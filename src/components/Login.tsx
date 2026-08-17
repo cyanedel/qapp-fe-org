@@ -48,11 +48,11 @@ export const Login = () => {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-transparent p-4 dark:bg-background">
+    <div className="relative flex min-h-screen items-center justify-center bg-transparent px-4 pt-20 pb-6 dark:bg-background">
       <Card className="w-full max-w-md border-amber-900/15 bg-[#FFF4CC]/90 shadow-2xl shadow-amber-950/15 backdrop-blur-md ring-amber-900/5 dark:border-border/50 dark:bg-card/95 dark:shadow-black/40 dark:ring-foreground/10">
         <CardHeader className="space-y-2 pb-6 text-center">
           <CardTitle className="text-2xl font-bold tracking-tight">Welcome back</CardTitle>
-          <CardDescription>Sign in to your QApp creator account.</CardDescription>
+          <CardDescription>Sign in to your Potero creator account.</CardDescription>
         </CardHeader>
 
         <form onSubmit={handleSubmit}>

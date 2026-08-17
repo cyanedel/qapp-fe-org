@@ -1,4 +1,5 @@
 import { env } from "@/config/env"
+import { collectAccessLogInfo } from "@/lib/accessLogInfo"
 import type { User } from "@/types"
 
 export const AUTH_SESSION_EXPIRED_EVENT = "qapp-auth-session-expired"
@@ -15,13 +16,13 @@ const notifySessionExpired = () => {
 }
 
 export const loginUser = async (email: string, password: string) => {
-  const response = await fetch(`${env.API_URL}/auth/login`, {
+  const response = await fetch(`${env.API_URL}/org/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     credentials: "include",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, info: collectAccessLogInfo() }),
   })
 
   const data = await response.json()
@@ -33,8 +34,27 @@ export const loginUser = async (email: string, password: string) => {
   return data
 }
 
+export const registerUser = async (email: string, password: string) => {
+  const response = await fetch(`${env.API_URL}/org/auth/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ email, password }),
+  })
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to register account")
+  }
+
+  return data
+}
+
 export const getCurrentUser = async (): Promise<User> => {
-  const response = await fetch(`${env.API_URL}/auth/me`, {
+  const response = await fetch(`${env.API_URL}/org/auth/me`, {
     method: "GET",
     credentials: "include",
   })
@@ -69,9 +89,13 @@ export const handleAuthResponse = (response: Response) => {
 }
 
 export const logoutUser = async () => {
-  const response = await fetch(`${env.API_URL}/auth/logout`, {
+  const response = await fetch(`${env.API_URL}/org/auth/logout`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     credentials: "include",
+    body: JSON.stringify({ info: collectAccessLogInfo() }),
   })
 
   const data = await response.json()

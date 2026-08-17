@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react"
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from "react-router-dom"
 import { AUTH_SESSION_EXPIRED_EVENT, validateCurrentSession } from "@/api/auth"
+import { AuthNav } from "@/components/AuthNav"
 import { Home } from "@/components/Home"
 import { Login } from "@/components/Login"
+import { Profile } from "@/components/Profile"
+import { Register } from "@/components/Register"
+import { SidebarLayout } from "@/components/SidebarLayout"
 import { ThemeProvider } from "@/components/ThemeProvider"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
@@ -53,7 +57,7 @@ function App() {
   }, [logout, navigate])
 
   useEffect(() => {
-    const isLoginRoute = location.pathname === "/login"
+    const isLoginRoute = location.pathname === "/login" || location.pathname === "/register"
 
     document.body.classList.toggle("login-light-surface", isLoginRoute)
 
@@ -81,18 +85,33 @@ function App() {
       <div
         className={cn(
           "flex min-h-screen flex-col text-foreground antialiased",
-          location.pathname === "/login" ? "bg-transparent dark:bg-background" : "bg-background"
+          location.pathname === "/login" || location.pathname === "/register"
+            ? "bg-transparent dark:bg-background"
+            : "bg-background"
         )}
       >
         <main className="flex-1">
           <Routes>
             <Route element={<PublicOnlyRoute />}>
-              <Route path="/login" element={<Login />} />
+              <Route
+                element={
+                  <>
+                    <AuthNav />
+                    <Outlet />
+                  </>
+                }
+              >
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+              </Route>
             </Route>
 
             <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/home" element={<Home />} />
+              <Route element={<SidebarLayout />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/profile" element={<Profile />} />
+              </Route>
             </Route>
 
             <Route path="*" element={<Navigate to="/home" replace />} />
