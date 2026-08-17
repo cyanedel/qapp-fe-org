@@ -1,7 +1,7 @@
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"
-import { Home, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings, User as UserIcon } from "lucide-react"
+import { FolderPlus, Home, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings, User as UserIcon } from "lucide-react"
 import { logoutUser } from "@/api/auth"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -74,6 +74,7 @@ export const SidebarLayout = () => {
 
         <nav className="flex flex-1 flex-col gap-1 p-3" aria-label="Main">
           <SidebarLink to="/home" icon={<Home className="h-4 w-4" />} label="Home" isOpen={isSidebarOpen} active={location.pathname === "/home" || location.pathname === "/"} />
+          <SidebarLink to="/collections/create" icon={<FolderPlus className="h-4 w-4" />} label="Create Collection" isOpen={isSidebarOpen} active={location.pathname === "/collections/create"} />
         </nav>
 
         <div className="space-y-2 border-t p-3">

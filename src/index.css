@@ -253,3 +253,16 @@ code {
     @apply bg-background text-foreground;}
   html {
     @apply font-sans;}}
+
+.question-sortable-ghost {
+  opacity: 0.4;
+}
+
+.question-sortable-chosen {
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--primary), transparent 70%);
+}
+
+.question-sortable-drag {
+  cursor: grabbing;
+  box-shadow: 0 20px 35px -20px rgb(0 0 0 / 45%);
+}
