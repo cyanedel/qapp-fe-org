@@ -1,7 +1,7 @@
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"
-import { FolderPlus, Home, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings, User as UserIcon } from "lucide-react"
+import { Building2, Check, ChevronDown, FolderPlus, Home, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Plus, Settings, User as UserIcon } from "lucide-react"
 import { logoutUser } from "@/api/auth"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -14,11 +14,18 @@ export const SidebarLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [isHeaderUserMenuOpen, setIsHeaderUserMenuOpen] = useState(false)
+  const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false)
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>("")
   const userMenuRef = useRef<HTMLDivElement>(null)
   const headerUserMenuRef = useRef<HTMLDivElement>(null)
+  const workspaceMenuRef = useRef<HTMLDivElement>(null)
 
   const displayName = user?.display_name || user?.username || user?.email || "User"
   const avatarInitial = displayName.charAt(0).toUpperCase()
+  const workspaces = user?.org ?? []
+  const selectedWorkspaceId = activeWorkspaceId || workspaces[0]?.org_id || ""
+  const selectedWorkspace = workspaces.find((workspace) => workspace.org_id === selectedWorkspaceId)
+  const selectedWorkspaceName = selectedWorkspace?.display_name || "No workspace"
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -28,6 +35,10 @@ export const SidebarLayout = () => {
 
       if (headerUserMenuRef.current && !headerUserMenuRef.current.contains(event.target as Node)) {
         setIsHeaderUserMenuOpen(false)
+      }
+
+      if (workspaceMenuRef.current && !workspaceMenuRef.current.contains(event.target as Node)) {
+        setIsWorkspaceMenuOpen(false)
       }
     }
 
@@ -153,7 +164,56 @@ export const SidebarLayout = () => {
               <Menu className="h-4 w-4" />
             </Button>
 
-            <div ref={headerUserMenuRef} className="relative ml-auto">
+            <div className="ml-auto flex items-center gap-3">
+              <div ref={workspaceMenuRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsWorkspaceMenuOpen((current) => !current)}
+                  className="flex h-9 max-w-64 items-center gap-2 rounded-md border bg-card py-1 pr-2 pl-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+                  aria-label="Select workspace"
+                  aria-expanded={isWorkspaceMenuOpen}
+                >
+                  <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span className="hidden text-xs font-medium uppercase text-muted-foreground sm:inline">Workspace</span>
+                  <span className="max-w-36 truncate">{selectedWorkspaceName}</span>
+                  <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                </button>
+
+                {isWorkspaceMenuOpen && (
+                  <div className="absolute top-11 right-0 z-50 w-64 overflow-hidden rounded-lg border bg-popover py-1 text-popover-foreground shadow-lg">
+                    <div className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">Workspace</div>
+                    {workspaces.length === 0 ? (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">No workspace</div>
+                    ) : (
+                      workspaces.map((workspace) => (
+                        <button
+                          key={workspace.org_id}
+                          type="button"
+                          onClick={() => {
+                            setActiveWorkspaceId(workspace.org_id)
+                            setIsWorkspaceMenuOpen(false)
+                          }}
+                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium transition-colors hover:bg-muted"
+                        >
+                          <Check className={cn("h-4 w-4", selectedWorkspaceId === workspace.org_id ? "text-primary" : "text-transparent")} />
+                          <span className="truncate">{workspace.display_name || "Untitled workspace"}</span>
+                        </button>
+                      ))
+                    )}
+                    <div className="my-1 border-t" />
+                    <button
+                      type="button"
+                      onClick={() => setIsWorkspaceMenuOpen(false)}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium transition-colors hover:bg-muted"
+                    >
+                      <Plus className="h-4 w-4 text-muted-foreground" />
+                      Create new workspace
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div ref={headerUserMenuRef} className="relative">
               <button
                 type="button"
                 onClick={() => setIsHeaderUserMenuOpen((current) => !current)}
@@ -187,6 +247,7 @@ export const SidebarLayout = () => {
                   </button>
                 </div>
               )}
+              </div>
             </div>
           </div>
         </header>

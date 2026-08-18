@@ -1,5 +1,15 @@
 export type UserRole = "end_user" | "question_maker" | "admin"
 
+export interface UserOrganization {
+  org_id: string
+  display_name?: string | null
+}
+
+export interface UserRoleAssignment {
+  role_id: number
+  role: string
+}
+
 export interface User {
   user_id: string
   username: string
@@ -16,7 +26,10 @@ export interface User {
   gender?: string | null
   profession?: string | null
   avatar_url?: string | null
-  role: UserRole
+  role?: UserRole
+  org?: UserOrganization[]
+  org_id?: string[]
+  roles?: UserRoleAssignment[]
   created_at: string
   updated_at: string
 }
