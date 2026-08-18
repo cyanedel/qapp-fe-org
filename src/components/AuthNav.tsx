@@ -41,7 +41,7 @@ export const AuthNav = () => {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-amber-900/10 bg-[#FFFAE5]/90 backdrop-blur-sm dark:border-border dark:bg-background/95">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4">
+      <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-6">
         <Link to="/login" className="inline-flex items-center">
           <img src="/potero_text.svg" alt="Potero" className="h-7 w-auto" />
         </Link>

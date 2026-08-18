@@ -139,53 +139,55 @@ export const SidebarLayout = () => {
       </aside>
 
       <div className={cn("flex min-h-screen flex-1 flex-col transition-[padding-left] duration-200", isSidebarOpen ? "pl-64" : "pl-16")}>
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background/95 px-4 backdrop-blur-sm">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setIsSidebarOpen((current) => !current)}
-            aria-label="Toggle sidebar"
-            title="Toggle sidebar"
-          >
-            <Menu className="h-4 w-4" />
-          </Button>
-
-          <div ref={headerUserMenuRef} className="relative ml-auto">
-            <button
+        <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur-sm">
+          <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-6">
+            <Button
               type="button"
-              onClick={() => setIsHeaderUserMenuOpen((current) => !current)}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary ring-1 ring-primary/20 transition-colors hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
-              aria-label="Open profile menu"
-              aria-expanded={isHeaderUserMenuOpen}
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setIsSidebarOpen((current) => !current)}
+              aria-label="Toggle sidebar"
+              title="Toggle sidebar"
             >
-              {avatarInitial}
-            </button>
+              <Menu className="h-4 w-4" />
+            </Button>
 
-            {isHeaderUserMenuOpen && (
-              <div className="absolute top-11 right-0 z-50 w-56 overflow-hidden rounded-lg border bg-popover py-1 text-popover-foreground shadow-lg">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsHeaderUserMenuOpen(false)
-                    navigate("/profile")
-                  }}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium transition-colors hover:bg-muted"
-                >
-                  <UserIcon className="h-4 w-4 text-muted-foreground" />
-                  Profile
-                </button>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-destructive transition-colors hover:bg-destructive/10"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </button>
-              </div>
-            )}
+            <div ref={headerUserMenuRef} className="relative ml-auto">
+              <button
+                type="button"
+                onClick={() => setIsHeaderUserMenuOpen((current) => !current)}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary ring-1 ring-primary/20 transition-colors hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+                aria-label="Open profile menu"
+                aria-expanded={isHeaderUserMenuOpen}
+              >
+                {avatarInitial}
+              </button>
+
+              {isHeaderUserMenuOpen && (
+                <div className="absolute top-11 right-0 z-50 w-56 overflow-hidden rounded-lg border bg-popover py-1 text-popover-foreground shadow-lg">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsHeaderUserMenuOpen(false)
+                      navigate("/profile")
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium transition-colors hover:bg-muted"
+                  >
+                    <UserIcon className="h-4 w-4 text-muted-foreground" />
+                    Profile
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-destructive transition-colors hover:bg-destructive/10"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
         <main className="flex-1">

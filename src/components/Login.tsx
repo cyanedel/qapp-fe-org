@@ -9,6 +9,12 @@ import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { useAuthStore } from "@/store/useAuthStore"
 
+const demoAccounts = [
+  { label: "Creator 1", email: "creator1@qapp.com", password: "CreatorPass123!" },
+  { label: "Creator 2", email: "creator2@qapp.com", password: "CreatorPass123!" },
+  { label: "Creator 3", email: "creator3@qapp.com", password: "CreatorPass123!" },
+]
+
 export const Login = () => {
   const navigate = useNavigate()
   const setUser = useAuthStore((state) => state.setUser)
@@ -41,9 +47,9 @@ export const Login = () => {
     }
   }
 
-  const handleQuickFill = () => {
-    setEmail("creator@qapp.com")
-    setPassword("CreatorPass123!")
+  const handleQuickFill = (account: (typeof demoAccounts)[number]) => {
+    setEmail(account.email)
+    setPassword(account.password)
     setError(null)
   }
 
@@ -103,9 +109,20 @@ export const Login = () => {
 
           <CardFooter className="flex flex-col gap-2 border-t border-amber-900/10 pt-4 text-center dark:border-border/40">
             <p className="text-xs font-medium text-muted-foreground">Quick Demo Account</p>
-            <Button type="button" variant="outline" size="sm" className="w-full" onClick={handleQuickFill}>
-              Creator
-            </Button>
+            <div className="grid w-full grid-cols-3 gap-2">
+              {demoAccounts.map((account) => (
+                <Button
+                  key={account.email}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full px-2"
+                  onClick={() => handleQuickFill(account)}
+                >
+                  {account.label}
+                </Button>
+              ))}
+            </div>
           </CardFooter>
         </form>
       </Card>
