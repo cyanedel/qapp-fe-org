@@ -1,7 +1,7 @@
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"
-import { Building2, Check, ChevronDown, FolderPlus, Home, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Plus, Settings, User as UserIcon } from "lucide-react"
+import { Building2, Check, ChevronDown, FileUp, Folder, FolderPlus, Home, List, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Plus, Settings, User as UserIcon } from "lucide-react"
 import { logoutUser } from "@/api/auth"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -15,6 +15,7 @@ export const SidebarLayout = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [isHeaderUserMenuOpen, setIsHeaderUserMenuOpen] = useState(false)
   const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false)
+  const [isCollectionsMenuOpen, setIsCollectionsMenuOpen] = useState(() => location.pathname.startsWith("/collections"))
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>("")
   const userMenuRef = useRef<HTMLDivElement>(null)
   const headerUserMenuRef = useRef<HTMLDivElement>(null)
@@ -26,6 +27,7 @@ export const SidebarLayout = () => {
   const selectedWorkspaceId = activeWorkspaceId || workspaces[0]?.org_id || ""
   const selectedWorkspace = workspaces.find((workspace) => workspace.org_id === selectedWorkspaceId)
   const selectedWorkspaceName = selectedWorkspace?.display_name || "No workspace"
+  const isCollectionsRoute = location.pathname.startsWith("/collections")
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -85,7 +87,39 @@ export const SidebarLayout = () => {
 
         <nav className="flex flex-1 flex-col gap-1 p-3" aria-label="Main">
           <SidebarLink to="/home" icon={<Home className="h-4 w-4" />} label="Home" isOpen={isSidebarOpen} active={location.pathname === "/home" || location.pathname === "/"} />
-          <SidebarLink to="/collections/create" icon={<FolderPlus className="h-4 w-4" />} label="Create Collection" isOpen={isSidebarOpen} active={location.pathname === "/collections/create"} />
+          <div className="space-y-1">
+            <Button
+              type="button"
+              variant={isCollectionsRoute ? "secondary" : "ghost"}
+              className={cn("w-full justify-start", !isSidebarOpen && "justify-center px-0")}
+              onClick={() => {
+                if (!isSidebarOpen) {
+                  navigate("/collections")
+                  return
+                }
+
+                setIsCollectionsMenuOpen((current) => !current)
+              }}
+              aria-expanded={isCollectionsMenuOpen}
+              aria-controls="collections-sidebar-menu"
+              title="Collections"
+            >
+              <Folder className="h-4 w-4" />
+              {isSidebarOpen && (
+                <>
+                  <span className="flex-1 text-left">Collections</span>
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", !isCollectionsMenuOpen && "-rotate-90")} />
+                </>
+              )}
+            </Button>
+            {isSidebarOpen && isCollectionsMenuOpen && (
+              <div id="collections-sidebar-menu" className="space-y-1 pl-4">
+                <SidebarLink to="/collections" icon={<List className="h-4 w-4" />} label="List Collections" isOpen={isSidebarOpen} active={location.pathname === "/collections"} />
+                <SidebarLink to="/collections/create" icon={<FolderPlus className="h-4 w-4" />} label="Create New" isOpen={isSidebarOpen} active={location.pathname === "/collections/create"} />
+                <SidebarLink to="/collections/import" icon={<FileUp className="h-4 w-4" />} label="Import Collection" isOpen={isSidebarOpen} active={location.pathname === "/collections/import"} />
+              </div>
+            )}
+          </div>
         </nav>
 
         <div className="space-y-2 border-t p-3">

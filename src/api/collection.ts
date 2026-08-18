@@ -22,6 +22,32 @@ export interface CreateCollectionResponse {
   collection_id?: string
 }
 
+export interface CollectionSummary {
+  collectionid: string
+  org_id?: string | null
+  user_id?: string
+  user_id_last?: string
+  title: string
+  description?: string | null
+  tags?: string[]
+}
+
+export const getCollectionList = async (): Promise<CollectionSummary[]> => {
+  const response = await fetch(`${env.API_URL}/collection/list`, {
+    method: "GET",
+    credentials: "include",
+  })
+
+  handleAuthResponse(response)
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to load collections")
+  }
+
+  return data.data ?? []
+}
+
 export const createCollection = async (payload: CreateCollectionPayload): Promise<CreateCollectionResponse> => {
   const response = await fetch(`${env.API_URL}/collection/create`, {
     method: "POST",

@@ -5,7 +5,7 @@ export const Home = () => {
         <p className="text-sm font-medium text-primary">Home</p>
         <h1 className="text-3xl font-bold tracking-tight">Welcome to Potero</h1>
         <p className="max-w-2xl text-sm text-muted-foreground">
-          Manage your organization workspace and creator activity from this dashboard.
+          Manage your workspace and creator activity from this dashboard.
         </p>
       </div>
 

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
+import { useAuthStore } from "@/store/useAuthStore"
 
 interface QuestionForm {
   id: string
@@ -24,10 +25,11 @@ const createBlankQuestion = (): QuestionForm => ({
 })
 
 export const CreateCollection = () => {
+  const user = useAuthStore((state) => state.user)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [tags, setTags] = useState("")
-  const [maxAttempts, setMaxAttempts] = useState("")
+  const [maxAttempts, setMaxAttempts] = useState("0")
   const [questions, setQuestions] = useState<QuestionForm[]>([createBlankQuestion()])
   const [collapsedQuestionIds, setCollapsedQuestionIds] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
@@ -42,6 +44,7 @@ export const CreateCollection = () => {
         .filter(Boolean),
     [tags]
   )
+  const workspaceId = user?.org?.[0]?.org_id || user?.org_id?.[0] || ""
 
   const updateQuestion = (questionIndex: number, value: string) => {
     setQuestions((currentQuestions) =>
@@ -97,6 +100,7 @@ export const CreateCollection = () => {
 
   const validateForm = () => {
     if (!title.trim()) return "Collection title is required."
+    if (!workspaceId) return "A workspace is required to create a collection."
     if (questions.length === 0) return "Add at least one question."
 
     const invalidQuestionIndex = questions.findIndex((question) => {
@@ -108,8 +112,8 @@ export const CreateCollection = () => {
     }
 
     const maxAttemptsNumber = Number(maxAttempts)
-    if (maxAttempts && (!Number.isInteger(maxAttemptsNumber) || maxAttemptsNumber < 1)) {
-      return "Max attempts must be a whole number greater than 0."
+    if (!Number.isInteger(maxAttemptsNumber) || maxAttemptsNumber < 0) {
+      return "Max attempts must be a whole number of 0 or greater."
     }
 
     return null
@@ -130,10 +134,11 @@ export const CreateCollection = () => {
 
     try {
       const response = await createCollection({
+        org_id: workspaceId,
         title: title.trim(),
         description: description.trim() || null,
         tags: parsedTags,
-        max_attempts: maxAttempts ? Number(maxAttempts) : null,
+        max_attempts: Number(maxAttempts),
         questions: questions.map((question) => ({
           QuestionText: question.questionText.trim(),
           Options: question.options.map((option) => option.trim()),
@@ -145,7 +150,7 @@ export const CreateCollection = () => {
       setTitle("")
       setDescription("")
       setTags("")
-      setMaxAttempts("")
+      setMaxAttempts("0")
       setQuestions([createBlankQuestion()])
       setCollapsedQuestionIds([])
     } catch (err) {
@@ -157,8 +162,8 @@ export const CreateCollection = () => {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 py-8">
-      <div className="space-y-2">
+    <div className="mx-auto flex w-full max-w-5xl min-w-0 flex-col gap-6 overflow-x-hidden px-6 py-8">
+      <div className="min-w-0 space-y-2">
         <p className="text-sm font-medium text-primary">Collections</p>
         <h1 className="text-3xl font-bold tracking-tight">Create question collection</h1>
         <p className="max-w-2xl text-sm text-muted-foreground">
@@ -180,12 +185,12 @@ export const CreateCollection = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <Card>
+      <form onSubmit={handleSubmit} className="min-w-0 space-y-6 overflow-x-hidden">
+        <Card className="min-w-0 overflow-hidden">
           <CardHeader>
             <CardTitle>Collection details</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
+          <CardContent className="grid min-w-0 gap-4 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="collection-title">Title</Label>
               <Input
@@ -206,7 +211,7 @@ export const CreateCollection = () => {
                 onChange={(event) => setDescription(event.target.value)}
                 placeholder="Describe what this collection is for"
                 disabled={loading}
-                className="min-h-24 w-full rounded-md border border-transparent bg-input/50 px-3 py-2 text-sm outline-none transition-[color,box-shadow,background-color] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                className="min-h-24 w-full min-w-0 resize-y rounded-md border border-transparent bg-input/50 px-3 py-2 text-sm break-words outline-none transition-[color,box-shadow,background-color] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
 
@@ -226,11 +231,11 @@ export const CreateCollection = () => {
               <Input
                 id="collection-max-attempts"
                 type="number"
-                min="1"
+                min="0"
                 step="1"
                 value={maxAttempts}
                 onChange={(event) => setMaxAttempts(event.target.value)}
-                placeholder="Unlimited"
+                placeholder="0 means no limit"
                 disabled={loading}
               />
             </div>
@@ -248,15 +253,15 @@ export const CreateCollection = () => {
           chosenClass="question-sortable-chosen"
           dragClass="question-sortable-drag"
           disabled={loading}
-          className="space-y-4"
+          className="min-w-0 space-y-4 overflow-x-hidden"
         >
           {questions.map((question, questionIndex) => (
-            <div key={question.id} className="question-sortable-item">
-              <Card>
-                <CardHeader className="flex-row items-center justify-between space-y-0">
-                  <div className="flex min-w-0 items-center gap-2">
+            <div key={question.id} className="question-sortable-item min-w-0 max-w-full overflow-hidden">
+              <Card className="min-w-0 max-w-full overflow-hidden">
+                <CardHeader className="flex-row items-start justify-between gap-3 space-y-0">
+                  <div className="flex min-w-0 flex-1 items-start gap-2">
                     <span
-                      className="question-drag-handle flex h-8 w-8 cursor-grab items-center justify-center rounded-md text-muted-foreground hover:bg-muted active:cursor-grabbing"
+                      className="question-drag-handle flex h-8 w-8 shrink-0 cursor-grab items-center justify-center rounded-md text-muted-foreground hover:bg-muted active:cursor-grabbing"
                       role="button"
                       aria-label={`Drag question ${questionIndex + 1}`}
                       title={`Drag question ${questionIndex + 1}`}
@@ -267,22 +272,28 @@ export const CreateCollection = () => {
                     <button
                       type="button"
                       onClick={() => toggleQuestionCollapsed(question.id)}
-                      className="flex min-w-0 items-center gap-2 text-left"
+                      className="flex min-w-0 flex-1 items-start gap-2 text-left"
                       aria-expanded={!collapsedQuestionIds.includes(question.id)}
                       aria-controls={`question-panel-${question.id}`}
                     >
                       <ChevronDown
-                        className={`h-4 w-4 shrink-0 transition-transform ${
+                        className={`mt-1 h-4 w-4 shrink-0 transition-transform ${
                           collapsedQuestionIds.includes(question.id) ? "-rotate-90" : ""
                         }`}
                       />
-                      <CardTitle className="truncate">
-                        Question {questionIndex + 1}
-                        {question.questionText.trim() ? `: ${question.questionText.trim()}` : ""}
-                      </CardTitle>
+                      <span className="min-w-0 flex-1 overflow-hidden">
+                        <CardTitle className="text-base leading-snug">
+                          Question {questionIndex + 1}
+                        </CardTitle>
+                        {question.questionText.trim() && (
+                          <span className="mt-1 block max-w-full whitespace-normal text-sm leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
+                            {question.questionText.trim()}
+                          </span>
+                        )}
+                      </span>
                     </button>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-2">
                     <Button
                       type="button"
                       variant="destructive"
@@ -298,7 +309,7 @@ export const CreateCollection = () => {
                 </CardHeader>
                 <CardContent
                   id={`question-panel-${question.id}`}
-                  className={`space-y-4 ${collapsedQuestionIds.includes(question.id) ? "hidden" : ""}`}
+                  className={`min-w-0 space-y-4 overflow-hidden ${collapsedQuestionIds.includes(question.id) ? "hidden" : ""}`}
                 >
                   <div className="space-y-2">
                     <Label htmlFor={`question-${question.id}`}>Question text</Label>
@@ -308,14 +319,15 @@ export const CreateCollection = () => {
                       onChange={(event) => updateQuestion(questionIndex, event.target.value)}
                       placeholder="Write the question"
                       disabled={loading}
-                      className="min-h-24 w-full rounded-md border border-transparent bg-input/50 px-3 py-2 text-sm outline-none transition-[color,box-shadow,background-color] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                      wrap="soft"
+                      className="min-h-24 w-full min-w-0 resize-y overflow-x-hidden rounded-md border border-transparent bg-input/50 px-3 py-2 text-sm whitespace-pre-wrap break-words outline-none transition-[color,box-shadow,background-color] [overflow-wrap:anywhere] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
                       required
                     />
                   </div>
 
-                  <div className="grid gap-3 md:grid-cols-2">
+                  <div className="grid min-w-0 gap-3 md:grid-cols-2">
                     {question.options.map((option, optionIndex) => (
-                      <label key={optionIndex} className="space-y-2 rounded-lg border bg-background p-3">
+                      <label key={optionIndex} className="min-w-0 space-y-2 overflow-hidden rounded-lg border bg-background p-3">
                         <span className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground">
                           <input
                             type="radio"

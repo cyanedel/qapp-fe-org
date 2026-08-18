@@ -6,7 +6,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 
 export const Profile = () => {
   const user = useAuthStore((state) => state.user)
-  const displayName = user?.display_name || user?.username || "Organization user"
+  const displayName = user?.display_name || user?.username || "Workspace user"
   const avatarInitial = displayName.charAt(0).toUpperCase()
 
   const joinedDate = useMemo(() => {
@@ -24,7 +24,7 @@ export const Profile = () => {
       <div className="space-y-2">
         <p className="text-sm font-medium text-primary">Profile</p>
         <h1 className="text-3xl font-bold tracking-tight">Profile information</h1>
-        <p className="text-sm text-muted-foreground">View your organization account details.</p>
+        <p className="text-sm text-muted-foreground">View your workspace account details.</p>
       </div>
 
       <Card className="border-border/50 shadow-lg">
