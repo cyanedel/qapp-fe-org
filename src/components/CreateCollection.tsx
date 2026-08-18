@@ -20,11 +20,12 @@ const createBlankQuestion = (): QuestionForm => ({
   id: crypto.randomUUID(),
   questionText: "",
   options: ["", "", "", ""],
-  correctAnswer: 0,
+  correctAnswer: 1,
 })
 
 export const CreateCollection = () => {
   const [title, setTitle] = useState("")
+  const [description, setDescription] = useState("")
   const [tags, setTags] = useState("")
   const [maxAttempts, setMaxAttempts] = useState("")
   const [questions, setQuestions] = useState<QuestionForm[]>([createBlankQuestion()])
@@ -130,6 +131,7 @@ export const CreateCollection = () => {
     try {
       const response = await createCollection({
         title: title.trim(),
+        description: description.trim() || null,
         tags: parsedTags,
         max_attempts: maxAttempts ? Number(maxAttempts) : null,
         questions: questions.map((question) => ({
@@ -141,6 +143,7 @@ export const CreateCollection = () => {
 
       setSuccessMessage(`Collection created${response.collection_id ? `: ${response.collection_id}` : "."}`)
       setTitle("")
+      setDescription("")
       setTags("")
       setMaxAttempts("")
       setQuestions([createBlankQuestion()])
@@ -195,8 +198,20 @@ export const CreateCollection = () => {
               />
             </div>
 
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="collection-description">Description</Label>
+              <textarea
+                id="collection-description"
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder="Describe what this collection is for"
+                disabled={loading}
+                className="min-h-24 w-full rounded-md border border-transparent bg-input/50 px-3 py-2 text-sm outline-none transition-[color,box-shadow,background-color] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="collection-tags">Tags</Label>
+              <Label htmlFor="collection-tags">Tags, separated by commas</Label>
               <Input
                 id="collection-tags"
                 value={tags}
@@ -305,8 +320,8 @@ export const CreateCollection = () => {
                           <input
                             type="radio"
                             name={`correct-answer-${question.id}`}
-                            checked={question.correctAnswer === optionIndex}
-                            onChange={() => updateCorrectAnswer(questionIndex, optionIndex)}
+                            checked={question.correctAnswer === optionIndex + 1}
+                            onChange={() => updateCorrectAnswer(questionIndex, optionIndex + 1)}
                             className="h-4 w-4 accent-primary"
                             disabled={loading}
                           />

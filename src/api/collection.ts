@@ -9,7 +9,9 @@ export interface CreateQuestionItem {
 
 export interface CreateCollectionPayload {
   collection_id?: string
+  org_id?: string
   title: string
+  description?: string | null
   questions: CreateQuestionItem[]
   tags?: string[]
   max_attempts?: number | null
