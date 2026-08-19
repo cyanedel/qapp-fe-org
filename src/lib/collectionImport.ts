@@ -1,4 +1,3 @@
-import ExcelJS from "exceljs"
 import Papa from "papaparse"
 
 export interface ImportedQuestion {
@@ -135,6 +134,7 @@ const parseCsv = async (file: File) => {
 }
 
 const parseXlsx = async (file: File) => {
+  const ExcelJS = (await import("exceljs")).default
   const workbook = new ExcelJS.Workbook()
   await workbook.xlsx.load(await file.arrayBuffer())
 
