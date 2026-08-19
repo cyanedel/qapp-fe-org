@@ -11,9 +11,9 @@ import { Spinner } from "@/components/ui/spinner"
 import { useAuthStore } from "@/store/useAuthStore"
 
 const demoAccounts = [
-  { label: "Creator 1", email: "creator1@qapp.com", password: "CreatorPass123!" },
-  { label: "Creator 2", email: "creator2@qapp.com", password: "CreatorPass123!" },
-  { label: "Creator 3", email: "creator3@qapp.com", password: "CreatorPass123!" },
+  { label: "Creator 1", email: "creator-alice@potero.com", password: "SeedPass123!" },
+  { label: "Creator 2", email: "creator-bob@potero.com", password: "SeedPass123!" },
+  { label: "Creator 3", email: "creator-charlie@potero.com", password: "SeedPass123!" },
 ]
 
 export const Login = () => {
