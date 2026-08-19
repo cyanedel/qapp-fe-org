@@ -2,7 +2,6 @@ import { useEffect, useState } from "react"
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from "react-router-dom"
 import { AUTH_SESSION_EXPIRED_EVENT, validateCurrentSession } from "@/api/auth"
 import { AuthNav } from "@/components/AuthNav"
-import { CollectionImport } from "@/components/CollectionImport"
 import { CollectionList } from "@/components/CollectionList"
 import { CreateCollection } from "@/components/CreateCollection"
 import { Home } from "@/components/Home"
@@ -115,7 +114,6 @@ function App() {
                 <Route path="/home" element={<Home />} />
                 <Route path="/collections" element={<CollectionList />} />
                 <Route path="/collections/create" element={<CreateCollection />} />
-                <Route path="/collections/import" element={<CollectionImport />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
             </Route>

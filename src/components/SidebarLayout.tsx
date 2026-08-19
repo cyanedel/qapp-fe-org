@@ -1,7 +1,7 @@
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"
-import { Building2, Check, ChevronDown, FileUp, Folder, FolderPlus, Home, List, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Plus, Settings, User as UserIcon } from "lucide-react"
+import { Building2, Check, ChevronDown, Folder, FolderPlus, Home, List, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Plus, Settings, User as UserIcon } from "lucide-react"
 import { logoutUser } from "@/api/auth"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -116,7 +116,6 @@ export const SidebarLayout = () => {
               <div id="collections-sidebar-menu" className="space-y-1 pl-4">
                 <SidebarLink to="/collections" icon={<List className="h-4 w-4" />} label="List Collections" isOpen={isSidebarOpen} active={location.pathname === "/collections"} />
                 <SidebarLink to="/collections/create" icon={<FolderPlus className="h-4 w-4" />} label="Create New" isOpen={isSidebarOpen} active={location.pathname === "/collections/create"} />
-                <SidebarLink to="/collections/import" icon={<FileUp className="h-4 w-4" />} label="Import Collection" isOpen={isSidebarOpen} active={location.pathname === "/collections/import"} />
               </div>
             )}
           </div>

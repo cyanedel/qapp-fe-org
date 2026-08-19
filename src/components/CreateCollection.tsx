@@ -1,7 +1,7 @@
 import type React from "react"
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { ReactSortable } from "react-sortablejs"
-import { AlertCircle, ChevronDown, GripVertical, Plus, Save, Trash2 } from "lucide-react"
+import { AlertCircle, ChevronDown, FileUp, GripVertical, Plus, Save, Trash2 } from "lucide-react"
 import { createCollection } from "@/api/collection"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,8 +9,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CollectionCreatedDialog } from "@/components/CollectionCreatedDialog"
 import { CollectionDetailsCard, type CollectionDetailsValues } from "@/components/CollectionDetailsCard"
 import { OperationOverlay } from "@/components/OperationOverlay"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
+import { isSupportedCollectionImport, parseCollectionImport, type ImportedQuestion } from "@/lib/collectionImport"
 import { useAuthStore } from "@/store/useAuthStore"
 
 interface QuestionForm {
@@ -29,6 +38,7 @@ const createBlankQuestion = (): QuestionForm => ({
 
 export const CreateCollection = () => {
   const user = useAuthStore((state) => state.user)
+  const importFileInputRef = useRef<HTMLInputElement>(null)
   const [details, setDetails] = useState<CollectionDetailsValues>({
     title: "",
     description: "",
@@ -38,7 +48,11 @@ export const CreateCollection = () => {
   const [questions, setQuestions] = useState<QuestionForm[]>([createBlankQuestion()])
   const [collapsedQuestionIds, setCollapsedQuestionIds] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
+  const [parsingImport, setParsingImport] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [selectedImportFileName, setSelectedImportFileName] = useState<string | null>(null)
+  const [pendingImportFile, setPendingImportFile] = useState<File | null>(null)
+  const [importWarningOpen, setImportWarningOpen] = useState(false)
   const [createdCollectionId, setCreatedCollectionId] = useState<string | undefined>()
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
 
@@ -51,6 +65,10 @@ export const CreateCollection = () => {
     [details.tags]
   )
   const workspaceId = user?.org?.[0]?.org_id || user?.org_id?.[0] || ""
+
+  const hasQuestionContent = questions.some(
+    (question) => question.questionText.trim() || question.options.some((option) => option.trim())
+  )
 
   const updateQuestion = (questionIndex: number, value: string) => {
     setQuestions((currentQuestions) =>
@@ -102,6 +120,66 @@ export const CreateCollection = () => {
         ? currentIds.filter((currentId) => currentId !== questionId)
         : [...currentIds, questionId]
     )
+  }
+
+  const applyImportedQuestions = async (file: File) => {
+    setError(null)
+    setParsingImport(true)
+
+    try {
+      const importedQuestions = await parseCollectionImport(file)
+      const nextQuestions: QuestionForm[] = importedQuestions.map((question: ImportedQuestion) => ({
+        ...question,
+        id: crypto.randomUUID(),
+      }))
+
+      setQuestions(nextQuestions)
+      setCollapsedQuestionIds([])
+      setSelectedImportFileName(file.name)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to parse the selected file."
+      setError(errorMessage)
+    } finally {
+      setParsingImport(false)
+    }
+  }
+
+  const handleImportFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null
+    if (!file) return
+
+    setError(null)
+
+    if (!isSupportedCollectionImport(file.name)) {
+      setError("Choose a JSON, CSV, or Excel (.xlsx) file.")
+      event.target.value = ""
+      return
+    }
+
+    if (hasQuestionContent) {
+      setPendingImportFile(file)
+      setImportWarningOpen(true)
+      return
+    }
+
+    void applyImportedQuestions(file)
+  }
+
+  const handleImportWarningChange = (open: boolean) => {
+    setImportWarningOpen(open)
+    if (!open) {
+      setPendingImportFile(null)
+      if (importFileInputRef.current) importFileInputRef.current.value = ""
+    }
+  }
+
+  const handleConfirmImport = async () => {
+    if (!pendingImportFile) return
+
+    const file = pendingImportFile
+    setPendingImportFile(null)
+    setImportWarningOpen(false)
+    await applyImportedQuestions(file)
   }
 
   const validateForm = () => {
@@ -157,6 +235,8 @@ export const CreateCollection = () => {
       setDetails({ title: "", description: "", tags: "", maxAttempts: "0" })
       setQuestions([createBlankQuestion()])
       setCollapsedQuestionIds([])
+      setSelectedImportFileName(null)
+      if (importFileInputRef.current) importFileInputRef.current.value = ""
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to create collection."
       setError(errorMessage)
@@ -185,6 +265,43 @@ export const CreateCollection = () => {
 
       <form onSubmit={handleSubmit} className="min-w-0 space-y-6 overflow-x-hidden">
         <CollectionDetailsCard values={details} onChange={setDetails} disabled={loading} />
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Import questions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="space-y-2">
+              <Label htmlFor="collection-import-file">Question file</Label>
+              <input
+                ref={importFileInputRef}
+                id="collection-import-file"
+                type="file"
+                accept=".json,.csv,.xlsx,application/json,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                onChange={handleImportFileChange}
+                disabled={loading || parsingImport}
+                className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-primary-foreground hover:file:bg-primary/80 disabled:pointer-events-none disabled:opacity-50"
+              />
+              <p className="text-xs text-muted-foreground">
+                Choose a JSON, CSV, or Excel (.xlsx) file. Imported questions will replace the current question list after confirmation.
+              </p>
+            </div>
+
+            {parsingImport && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground" role="status">
+                <Spinner className="size-4" />
+                Reading question file...
+              </div>
+            )}
+
+            {selectedImportFileName && !parsingImport && (
+              <div className="flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-sm">
+                <FileUp className="h-4 w-4 text-primary" />
+                <span className="truncate">Loaded {selectedImportFileName}</span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <ReactSortable<QuestionForm>
           list={questions}
@@ -322,6 +439,24 @@ export const CreateCollection = () => {
       </form>
       </div>
       <OperationOverlay open={loading} message="Creating collection..." />
+      <Dialog open={importWarningOpen} onOpenChange={handleImportWarningChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Replace current questions?</DialogTitle>
+            <DialogDescription>
+              Importing this file will replace the questions currently entered on this page. Your collection details will not be changed.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => handleImportWarningChange(false)} disabled={parsingImport}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={() => void handleConfirmImport()} disabled={parsingImport}>
+              Import file
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <CollectionCreatedDialog
         open={successDialogOpen}
         collectionId={createdCollectionId}
