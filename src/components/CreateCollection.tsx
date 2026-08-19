@@ -1,11 +1,14 @@
 import type React from "react"
 import { useMemo, useState } from "react"
 import { ReactSortable } from "react-sortablejs"
-import { AlertCircle, CheckCircle2, ChevronDown, GripVertical, Plus, Save, Trash2 } from "lucide-react"
+import { AlertCircle, ChevronDown, GripVertical, Plus, Save, Trash2 } from "lucide-react"
 import { createCollection } from "@/api/collection"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CollectionCreatedDialog } from "@/components/CollectionCreatedDialog"
+import { CollectionDetailsCard, type CollectionDetailsValues } from "@/components/CollectionDetailsCard"
+import { OperationOverlay } from "@/components/OperationOverlay"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { useAuthStore } from "@/store/useAuthStore"
@@ -26,23 +29,26 @@ const createBlankQuestion = (): QuestionForm => ({
 
 export const CreateCollection = () => {
   const user = useAuthStore((state) => state.user)
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [tags, setTags] = useState("")
-  const [maxAttempts, setMaxAttempts] = useState("0")
+  const [details, setDetails] = useState<CollectionDetailsValues>({
+    title: "",
+    description: "",
+    tags: "",
+    maxAttempts: "0",
+  })
   const [questions, setQuestions] = useState<QuestionForm[]>([createBlankQuestion()])
   const [collapsedQuestionIds, setCollapsedQuestionIds] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [createdCollectionId, setCreatedCollectionId] = useState<string | undefined>()
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false)
 
   const parsedTags = useMemo(
     () =>
-      tags
+      details.tags
         .split(",")
         .map((tag) => tag.trim())
         .filter(Boolean),
-    [tags]
+    [details.tags]
   )
   const workspaceId = user?.org?.[0]?.org_id || user?.org_id?.[0] || ""
 
@@ -99,7 +105,7 @@ export const CreateCollection = () => {
   }
 
   const validateForm = () => {
-    if (!title.trim()) return "Collection title is required."
+    if (!details.title.trim()) return "Collection title is required."
     if (!workspaceId) return "A workspace is required to create a collection."
     if (questions.length === 0) return "Add at least one question."
 
@@ -111,7 +117,7 @@ export const CreateCollection = () => {
       return `Question ${invalidQuestionIndex + 1} needs text and all option fields.`
     }
 
-    const maxAttemptsNumber = Number(maxAttempts)
+    const maxAttemptsNumber = Number(details.maxAttempts)
     if (!Number.isInteger(maxAttemptsNumber) || maxAttemptsNumber < 0) {
       return "Max attempts must be a whole number of 0 or greater."
     }
@@ -122,7 +128,7 @@ export const CreateCollection = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError(null)
-    setSuccessMessage(null)
+    setSuccessDialogOpen(false)
 
     const validationError = validateForm()
     if (validationError) {
@@ -135,22 +141,20 @@ export const CreateCollection = () => {
     try {
       const response = await createCollection({
         org_id: workspaceId,
-        title: title.trim(),
-        description: description.trim() || null,
+        title: details.title.trim(),
+        description: details.description.trim() || null,
         tags: parsedTags,
-        max_attempts: Number(maxAttempts),
+        max_attempts: Number(details.maxAttempts),
         questions: questions.map((question) => ({
-          QuestionText: question.questionText.trim(),
-          Options: question.options.map((option) => option.trim()),
-          CorrectAnswer: question.correctAnswer,
+          questionText: question.questionText.trim(),
+          options: question.options.map((option) => option.trim()),
+          correctAnswer: question.correctAnswer,
         })),
       })
 
-      setSuccessMessage(`Collection created${response.collection_id ? `: ${response.collection_id}` : "."}`)
-      setTitle("")
-      setDescription("")
-      setTags("")
-      setMaxAttempts("0")
+      setCreatedCollectionId(response.collection_id)
+      setSuccessDialogOpen(true)
+      setDetails({ title: "", description: "", tags: "", maxAttempts: "0" })
       setQuestions([createBlankQuestion()])
       setCollapsedQuestionIds([])
     } catch (err) {
@@ -162,7 +166,8 @@ export const CreateCollection = () => {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl min-w-0 flex-col gap-6 overflow-x-hidden px-6 py-8">
+    <>
+      <div className="mx-auto flex w-full max-w-5xl min-w-0 flex-col gap-6 overflow-x-hidden px-6 py-8">
       <div className="min-w-0 space-y-2">
         <p className="text-sm font-medium text-primary">Collections</p>
         <h1 className="text-3xl font-bold tracking-tight">Create question collection</h1>
@@ -178,69 +183,8 @@ export const CreateCollection = () => {
         </div>
       )}
 
-      {successMessage && (
-        <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-700 dark:text-emerald-300">
-          <CheckCircle2 className="h-4 w-4 shrink-0" />
-          <span>{successMessage}</span>
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="min-w-0 space-y-6 overflow-x-hidden">
-        <Card className="min-w-0 overflow-hidden">
-          <CardHeader>
-            <CardTitle>Collection details</CardTitle>
-          </CardHeader>
-          <CardContent className="grid min-w-0 gap-4 md:grid-cols-2">
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="collection-title">Title</Label>
-              <Input
-                id="collection-title"
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder="Example: Basic math placement quiz"
-                disabled={loading}
-                required
-              />
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="collection-description">Description</Label>
-              <textarea
-                id="collection-description"
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="Describe what this collection is for"
-                disabled={loading}
-                className="min-h-24 w-full min-w-0 resize-y rounded-md border border-transparent bg-input/50 px-3 py-2 text-sm break-words outline-none transition-[color,box-shadow,background-color] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="collection-tags">Tags, separated by commas</Label>
-              <Input
-                id="collection-tags"
-                value={tags}
-                onChange={(event) => setTags(event.target.value)}
-                placeholder="math, grade 7, placement"
-                disabled={loading}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="collection-max-attempts">Max attempts</Label>
-              <Input
-                id="collection-max-attempts"
-                type="number"
-                min="0"
-                step="1"
-                value={maxAttempts}
-                onChange={(event) => setMaxAttempts(event.target.value)}
-                placeholder="0 means no limit"
-                disabled={loading}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <CollectionDetailsCard values={details} onChange={setDetails} disabled={loading} />
 
         <ReactSortable<QuestionForm>
           list={questions}
@@ -376,6 +320,13 @@ export const CreateCollection = () => {
           </Button>
         </div>
       </form>
-    </div>
+      </div>
+      <OperationOverlay open={loading} message="Creating collection..." />
+      <CollectionCreatedDialog
+        open={successDialogOpen}
+        collectionId={createdCollectionId}
+        onOpenChange={setSuccessDialogOpen}
+      />
+    </>
   )
 }
