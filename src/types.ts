@@ -3,6 +3,7 @@ export type UserRole = "end_user" | "question_maker" | "admin"
 export interface UserOrganization {
   org_id: string
   display_name?: string | null
+  description?: string | null
 }
 
 export interface UserRoleAssignment {

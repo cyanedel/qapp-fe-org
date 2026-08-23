@@ -9,6 +9,9 @@ import { Login } from "@/components/Login"
 import { Profile } from "@/components/Profile"
 import { Register } from "@/components/Register"
 import { SidebarLayout } from "@/components/SidebarLayout"
+import { Workspaces } from "@/components/Workspaces"
+import { CreateWorkspace } from "@/components/CreateWorkspace"
+import { ManageWorkspace } from "@/components/ManageWorkspace"
 import { ThemeProvider } from "@/components/ThemeProvider"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
@@ -114,6 +117,9 @@ function App() {
                 <Route path="/home" element={<Home />} />
                 <Route path="/collections" element={<CollectionList />} />
                 <Route path="/collections/create" element={<CreateCollection />} />
+                <Route path="/workspaces" element={<Workspaces />} />
+                <Route path="/workspaces/create" element={<CreateWorkspace />} />
+                <Route path="/workspaces/:workspaceId/manage" element={<ManageWorkspace />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
             </Route>

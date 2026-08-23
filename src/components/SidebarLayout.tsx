@@ -1,7 +1,7 @@
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"
-import { Building2, Check, ChevronDown, Folder, FolderPlus, Home, List, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Plus, Settings, User as UserIcon } from "lucide-react"
+import { Building2, Check, ChevronDown, Folder, FolderPlus, Home, List, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Plus, Settings, User as UserIcon, Users } from "lucide-react"
 import { logoutUser } from "@/api/auth"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -16,6 +16,7 @@ export const SidebarLayout = () => {
   const [isHeaderUserMenuOpen, setIsHeaderUserMenuOpen] = useState(false)
   const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false)
   const [isCollectionsMenuOpen, setIsCollectionsMenuOpen] = useState(() => location.pathname.startsWith("/collections"))
+  const [isWorkspacesMenuOpen, setIsWorkspacesMenuOpen] = useState(() => location.pathname.startsWith("/workspaces"))
   const userMenuRef = useRef<HTMLDivElement>(null)
   const headerUserMenuRef = useRef<HTMLDivElement>(null)
   const workspaceMenuRef = useRef<HTMLDivElement>(null)
@@ -115,6 +116,32 @@ export const SidebarLayout = () => {
               <div id="collections-sidebar-menu" className="space-y-1 pl-4">
                 <SidebarLink to="/collections" icon={<List className="h-4 w-4" />} label="List Collections" isOpen={isSidebarOpen} active={location.pathname === "/collections"} />
                 <SidebarLink to="/collections/create" icon={<FolderPlus className="h-4 w-4" />} label="Create New" isOpen={isSidebarOpen} active={location.pathname === "/collections/create"} />
+              </div>
+            )}
+          </div>
+          <div className="space-y-1">
+            <Button
+              type="button"
+              variant={location.pathname.startsWith("/workspaces") ? "secondary" : "ghost"}
+              className={cn("w-full justify-start", !isSidebarOpen && "justify-center px-0")}
+              onClick={() => {
+                if (!isSidebarOpen) {
+                  navigate("/workspaces")
+                  return
+                }
+                setIsWorkspacesMenuOpen((current) => !current)
+              }}
+              aria-expanded={isWorkspacesMenuOpen}
+              aria-controls="workspaces-sidebar-menu"
+              title="Workspaces"
+            >
+              <Users className="h-4 w-4" />
+              {isSidebarOpen && <><span className="flex-1 text-left">Workspaces</span><ChevronDown className={cn("h-4 w-4 transition-transform", !isWorkspacesMenuOpen && "-rotate-90")} /></>}
+            </Button>
+            {isSidebarOpen && isWorkspacesMenuOpen && (
+              <div id="workspaces-sidebar-menu" className="space-y-1 pl-4">
+                <SidebarLink to="/workspaces" icon={<List className="h-4 w-4" />} label="All Workspaces" isOpen={isSidebarOpen} active={location.pathname === "/workspaces"} />
+                <SidebarLink to="/workspaces/create" icon={<Plus className="h-4 w-4" />} label="Create New" isOpen={isSidebarOpen} active={location.pathname === "/workspaces/create"} />
               </div>
             )}
           </div>
@@ -235,7 +262,10 @@ export const SidebarLayout = () => {
                     <div className="my-1 border-t" />
                     <button
                       type="button"
-                      onClick={() => setIsWorkspaceMenuOpen(false)}
+                      onClick={() => {
+                        setIsWorkspaceMenuOpen(false)
+                        navigate("/workspaces/create")
+                      }}
                       className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium transition-colors hover:bg-muted"
                     >
                       <Plus className="h-4 w-4 text-muted-foreground" />
