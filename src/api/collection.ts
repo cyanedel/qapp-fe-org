@@ -3,6 +3,7 @@ import { env } from "@/config/env"
 import { ApiError } from "@/api/response"
 
 export interface CreateQuestionItem {
+  id?: number
   questionText: string
   options: string[]
   correctAnswer: number
@@ -27,6 +28,33 @@ export interface CreateCollectionResponse {
   collection_id?: string
 }
 
+export interface CollectionQuestion {
+  id?: number
+  questionText: string
+  options: string[]
+  correctAnswer: number
+}
+
+export interface CollectionEditData {
+  collection_id: string
+  org_id?: string | null
+  title: string
+  description?: string | null
+  search_tags?: string[]
+  access_type: CollectionAccessType
+  max_attempts?: number | null
+  questions: CollectionQuestion[]
+}
+
+export interface UpdateCollectionPayload {
+  title: string
+  description: string | null
+  questions: CollectionQuestion[]
+  search_tags: string[]
+  access_type: CollectionAccessType
+  max_attempts: number
+}
+
 export interface CollectionSummary {
   collectionid: string
   org_id?: string | null
@@ -36,6 +64,7 @@ export interface CollectionSummary {
   description?: string | null
   search_tags?: string[]
   access_type?: CollectionAccessType
+  can_edit: boolean
 }
 
 export const getOrgCollectionList = async (orgId: string): Promise<CollectionSummary[]> => {
@@ -78,7 +107,7 @@ export interface CollectionAccessPolicyPayload {
   access_type: CollectionAccessType
 }
 
-export interface CollectionMaintainer {
+export interface CollectionEditor {
   collection_id: string
   user_id: string
   assigned_at?: string
@@ -117,22 +146,60 @@ const requestCollectionMutation = async (url: string, method: "PATCH" | "POST" |
   return data
 }
 
+export const deleteCollection = async (collectionId: string) =>
+  requestCollectionMutation(`/org/collection/${collectionId}`, "DELETE")
+
 export const updateCollectionAccessPolicy = async (collectionId: string, accessType: CollectionAccessType) =>
   requestCollectionMutation(`/org/collection/${collectionId}/access-policy`, "PATCH", { access_type: accessType })
 
-export const listCollectionMaintainers = async (collectionId: string): Promise<CollectionMaintainer[]> => {
-  const response = await fetch(`${env.API_URL}/org/collection/${collectionId}/maintainer/list`, { credentials: "include" })
+export const listCollectionEditors = async (collectionId: string): Promise<CollectionEditor[]> => {
+  const response = await fetch(`${env.API_URL}/org/collection/${collectionId}/editor/list`, { credentials: "include" })
   handleAuthResponse(response)
   const data = await response.json()
-  if (!response.ok) throw new ApiError(data, "Failed to load maintainers")
-  return data.maintainers ?? data.data ?? []
+  if (!response.ok) throw new ApiError(data, "Failed to load editors")
+  return data.editors ?? data.data ?? []
 }
 
-export const assignCollectionMaintainer = async (collectionId: string, userId: string) =>
-  requestCollectionMutation(`/org/collection/${collectionId}/maintainer`, "POST", { user_id: userId })
+export const assignCollectionEditor = async (collectionId: string, userId: string) =>
+  requestCollectionMutation(`/org/collection/${collectionId}/editor`, "POST", { user_id: userId })
 
-export const removeCollectionMaintainer = async (collectionId: string, userId: string) =>
-  requestCollectionMutation(`/org/collection/${collectionId}/maintainer/${userId}`, "DELETE")
+export const removeCollectionEditor = async (collectionId: string, userId: string) =>
+  requestCollectionMutation(`/org/collection/${collectionId}/editor/${userId}`, "DELETE")
+
+export interface CollectionEditPermissionResponse {
+  code: string
+  message: string
+  can_edit: boolean
+}
+
+export const getCollectionEditPermission = async (collectionId: string): Promise<CollectionEditPermissionResponse> => {
+  const response = await fetch(`${env.API_URL}/org/collection/${collectionId}/permissions`, { credentials: "include" })
+  handleAuthResponse(response)
+  const data = await response.json()
+  if (!response.ok) throw new ApiError(data, "Failed to check collection edit permission")
+  return data
+}
+
+export const getCollectionForEdit = async (collectionId: string): Promise<CollectionEditData> => {
+  const response = await fetch(`${env.API_URL}/org/collection/${collectionId}`, { credentials: "include" })
+  handleAuthResponse(response)
+  const data = await response.json()
+  if (!response.ok) throw new ApiError(data, "Failed to load collection")
+  return data.collection
+}
+
+export const updateCollection = async (collectionId: string, payload: UpdateCollectionPayload): Promise<CreateCollectionResponse> => {
+  const response = await fetch(`${env.API_URL}/org/collection/${collectionId}/edit`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  })
+  handleAuthResponse(response)
+  const data = await response.json()
+  if (!response.ok) throw new ApiError(data, "Failed to update collection")
+  return data
+}
 
 export const listOrganizationAccessTags = async (orgId: string): Promise<CollectionAccessTag[]> => {
   const response = await fetch(`${env.API_URL}/org/organization/${orgId}/access-tag/list`, { credentials: "include" })

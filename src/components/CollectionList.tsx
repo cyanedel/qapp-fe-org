@@ -1,17 +1,22 @@
 import { useEffect, useState } from "react"
-import { AlertCircle, FolderPlus, Tags } from "lucide-react"
-import { Link } from "react-router-dom"
-import { getOrgCollectionList, type CollectionSummary } from "@/api/collection"
+import { AlertCircle, Ellipsis, FolderPlus, Pencil, Tags, Trash2 } from "lucide-react"
+import { Link, useNavigate } from "react-router-dom"
+import { deleteCollection, getOrgCollectionList, type CollectionSummary } from "@/api/collection"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useAuthStore } from "@/store/useAuthStore"
 
 export const CollectionList = () => {
+  const navigate = useNavigate()
   const activeWorkspaceId = useAuthStore((state) => state.activeWorkspaceId)
   const [collections, setCollections] = useState<CollectionSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [collectionPendingDelete, setCollectionPendingDelete] = useState<CollectionSummary | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [collectionMenuOpen, setCollectionMenuOpen] = useState<string | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -50,6 +55,26 @@ export const CollectionList = () => {
     }
   }, [activeWorkspaceId])
 
+  const editableCollections = collections.filter((collection) => collection.can_edit)
+
+  const handleDelete = async () => {
+    if (!collectionPendingDelete) return
+
+    setDeleting(true)
+    setError(null)
+    try {
+      await deleteCollection(collectionPendingDelete.collectionid)
+      setCollections((currentCollections) =>
+        currentCollections.filter((collection) => collection.collectionid !== collectionPendingDelete.collectionid)
+      )
+      setCollectionPendingDelete(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to remove collection.")
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 py-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -83,18 +108,31 @@ export const CollectionList = () => {
             Loading collections...
           </CardContent>
         </Card>
-      ) : collections.length === 0 ? (
+      ) : editableCollections.length === 0 ? (
         <Card>
           <CardContent className="flex min-h-56 items-center justify-center text-center text-sm text-muted-foreground">
-            No collections found.
+            No editable collections found.
           </CardContent>
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
-          {collections.map((collection) => (
-            <Card key={collection.collectionid} className="transition-shadow hover:shadow-md">
+          {editableCollections.map((collection) => (
+            <Card
+              key={collection.collectionid}
+              className="group relative cursor-pointer transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              role="link"
+              tabIndex={0}
+              onClick={() => navigate(`/collections/${collection.collectionid}/edit`)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault()
+                  navigate(`/collections/${collection.collectionid}/edit`)
+                }
+              }}
+              aria-label={`Edit ${collection.title}`}
+            >
               <CardContent className="space-y-4 pt-6">
-                <div className="space-y-2">
+                <div className="space-y-2 pr-10">
                   <h2 className="text-lg font-semibold tracking-tight text-foreground">{collection.title}</h2>
                   <p className="line-clamp-3 text-sm text-muted-foreground">
                     {collection.description || "No description."}
@@ -121,10 +159,74 @@ export const CollectionList = () => {
                   </div>
                 )}
               </CardContent>
+              <div className="absolute right-3 top-3">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
+                  data-state={collectionMenuOpen === collection.collectionid ? "open" : "closed"}
+                  aria-label={`Collection actions for ${collection.title}`}
+                  aria-expanded={collectionMenuOpen === collection.collectionid}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setCollectionMenuOpen((current) => (current === collection.collectionid ? null : collection.collectionid))
+                  }}
+                >
+                  <Ellipsis className="h-5 w-5" />
+                </Button>
+                {collectionMenuOpen === collection.collectionid && (
+                  <div
+                    role="menu"
+                    className="absolute right-0 top-9 z-10 min-w-40 rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent focus:bg-accent focus:outline-none"
+                      onClick={() => navigate(`/collections/${collection.collectionid}/edit`)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                      Edit
+                    </button>
+                    <div className="my-1 h-px bg-border" />
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm text-destructive hover:bg-destructive/10 focus:bg-destructive/10 focus:outline-none"
+                      onClick={() => {
+                        setCollectionMenuOpen(null)
+                        setCollectionPendingDelete(collection)
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
             </Card>
           ))}
         </div>
       )}
+      <Dialog open={collectionPendingDelete !== null} onOpenChange={(open) => !open && !deleting && setCollectionPendingDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove collection?</DialogTitle>
+            <DialogDescription>
+              {collectionPendingDelete ? `“${collectionPendingDelete.title}” will be removed and can no longer be edited.` : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCollectionPendingDelete(null)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={() => void handleDelete()} disabled={deleting}>
+              {deleting ? "Removing..." : "Remove collection"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

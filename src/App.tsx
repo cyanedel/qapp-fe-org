@@ -4,6 +4,7 @@ import { AUTH_SESSION_EXPIRED_EVENT, validateCurrentSession } from "@/api/auth"
 import { AuthNav } from "@/components/AuthNav"
 import { CollectionList } from "@/components/CollectionList"
 import { CreateCollection } from "@/components/CreateCollection"
+import { EditCollection } from "@/components/EditCollection"
 import { Home } from "@/components/Home"
 import { Login } from "@/components/Login"
 import { Profile } from "@/components/Profile"
@@ -117,6 +118,7 @@ function App() {
                 <Route path="/home" element={<Home />} />
                 <Route path="/collections" element={<CollectionList />} />
                 <Route path="/collections/create" element={<CreateCollection />} />
+                <Route path="/collections/:collectionId/edit" element={<EditCollection />} />
                 <Route path="/workspaces" element={<Workspaces />} />
                 <Route path="/workspaces/create" element={<CreateWorkspace />} />
                 <Route path="/workspaces/:workspaceId/manage" element={<ManageWorkspace />} />

@@ -3,7 +3,7 @@ import type { SubmitEvent } from "react"
 import { useMemo, useRef, useState } from "react"
 import { ReactSortable } from "react-sortablejs"
 import { AlertCircle, ChevronDown, FileUp, GripVertical, Plus, Save, Trash2 } from "lucide-react"
-import { createCollection } from "@/api/collection"
+import { createCollection, type CollectionAccessType, type CollectionEditData } from "@/api/collection"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,9 +25,31 @@ import { useAuthStore } from "@/store/useAuthStore"
 
 interface QuestionForm {
   id: string
+  originalQuestionID?: number
   questionText: string
   options: string[]
   correctAnswer: number
+}
+
+interface CollectionFormPayload {
+  title: string
+  description: string | null
+  questions: Array<{
+    id?: number
+    questionText: string
+    options: string[]
+    correctAnswer: number
+  }>
+  search_tags: string[]
+  access_type: CollectionAccessType
+  max_attempts: number
+}
+
+interface CollectionFormProps {
+  mode: "create" | "edit"
+  initialCollection?: CollectionEditData
+  onSubmit: (payload: CollectionFormPayload & { org_id?: string }) => Promise<{ collection_id?: string }>
+  onSuccess?: (collectionId?: string) => void
 }
 
 const createBlankQuestion = (): QuestionForm => ({
@@ -37,18 +59,28 @@ const createBlankQuestion = (): QuestionForm => ({
   correctAnswer: 1,
 })
 
-export const CreateCollection = () => {
+export const CollectionForm = ({ mode, initialCollection, onSubmit, onSuccess }: CollectionFormProps) => {
   const user = useAuthStore((state) => state.user)
   const activeWorkspaceId = useAuthStore((state) => state.activeWorkspaceId)
   const importFileInputRef = useRef<HTMLInputElement>(null)
   const [details, setDetails] = useState<CollectionDetailsValues>({
-    title: "",
-    description: "",
-    searchTags: "",
-    accessType: "public",
-    maxAttempts: "0",
+    title: initialCollection?.title ?? "",
+    description: initialCollection?.description ?? "",
+    searchTags: initialCollection?.search_tags?.join(", ") ?? "",
+    accessType: initialCollection?.access_type ?? "public",
+    maxAttempts: String(initialCollection?.max_attempts ?? 0),
   })
-  const [questions, setQuestions] = useState<QuestionForm[]>([createBlankQuestion()])
+  const [questions, setQuestions] = useState<QuestionForm[]>(
+    initialCollection?.questions.length
+      ? initialCollection.questions.map((question) => ({
+          id: crypto.randomUUID(),
+          originalQuestionID: question.id,
+          questionText: question.questionText,
+          options: question.options,
+          correctAnswer: question.correctAnswer,
+        }))
+      : [createBlankQuestion()]
+  )
   const [collapsedQuestionIds, setCollapsedQuestionIds] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [parsingImport, setParsingImport] = useState(false)
@@ -187,7 +219,7 @@ export const CreateCollection = () => {
 
   const validateForm = () => {
     if (!details.title.trim()) return "Collection title is required."
-    if (!workspaceId) return "A workspace is required to create a collection."
+    if (mode === "create" && !workspaceId) return "A workspace is required to create a collection."
     if (questions.length === 0) return "Add at least one question."
 
     const invalidQuestionIndex = questions.findIndex((question) => {
@@ -220,29 +252,33 @@ export const CreateCollection = () => {
     setLoading(true)
 
     try {
-      const response = await createCollection({
-        org_id: workspaceId,
+      const response = await onSubmit({
+        ...(mode === "create" ? { org_id: workspaceId } : {}),
         title: details.title.trim(),
         description: details.description.trim() || null,
         search_tags: parsedTags,
         access_type: details.accessType,
         max_attempts: Number(details.maxAttempts),
         questions: questions.map((question) => ({
+          id: question.originalQuestionID,
           questionText: question.questionText.trim(),
           options: question.options.map((option) => option.trim()),
           correctAnswer: question.correctAnswer,
         })),
       })
 
-      setCreatedCollectionId(response.collection_id)
-      setSuccessDialogOpen(true)
-      setDetails({ title: "", description: "", searchTags: "", accessType: "public", maxAttempts: "0" })
-      setQuestions([createBlankQuestion()])
-      setCollapsedQuestionIds([])
-      setSelectedImportFileName(null)
-      if (importFileInputRef.current) importFileInputRef.current.value = ""
+      if (mode === "create") {
+        setCreatedCollectionId(response.collection_id)
+        setSuccessDialogOpen(true)
+        setDetails({ title: "", description: "", searchTags: "", accessType: "public", maxAttempts: "0" })
+        setQuestions([createBlankQuestion()])
+        setCollapsedQuestionIds([])
+        setSelectedImportFileName(null)
+        if (importFileInputRef.current) importFileInputRef.current.value = ""
+      }
+      onSuccess?.(response.collection_id)
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to create collection."
+      const errorMessage = err instanceof Error ? err.message : `Failed to ${mode} collection.`
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -254,9 +290,9 @@ export const CreateCollection = () => {
       <div className="mx-auto flex w-full max-w-5xl min-w-0 flex-col gap-6 overflow-x-hidden px-6 py-8">
       <div className="min-w-0 space-y-2">
         <p className="text-sm font-medium text-primary">Collections</p>
-        <h1 className="text-3xl font-bold tracking-tight">Create question collection</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{mode === "create" ? "Create question collection" : "Edit question collection"}</h1>
         <p className="max-w-2xl text-sm text-muted-foreground">
-          Build a collection by adding a title, tags, attempt limit, and multiple-choice questions.
+          {mode === "create" ? "Build" : "Update"} a collection with a title, tags, attempt limit, and multiple-choice questions.
         </p>
       </div>
 
@@ -430,19 +466,19 @@ export const CreateCollection = () => {
             {loading ? (
               <>
                 <Spinner className="mr-2 size-4" />
-                Creating...
+                {mode === "create" ? "Creating..." : "Saving..."}
               </>
             ) : (
               <>
                 <Save className="h-4 w-4" />
-                Create Collection
+                {mode === "create" ? "Create Collection" : "Save Changes"}
               </>
             )}
           </Button>
         </div>
       </form>
       </div>
-      <OperationOverlay open={loading} message="Creating collection..." />
+      <OperationOverlay open={loading} message={mode === "create" ? "Creating collection..." : "Saving collection..."} />
       <Dialog open={importWarningOpen} onOpenChange={handleImportWarningChange}>
         <DialogContent>
           <DialogHeader>
@@ -461,11 +497,9 @@ export const CreateCollection = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <CollectionCreatedDialog
-        open={successDialogOpen}
-        collectionId={createdCollectionId}
-        onOpenChange={setSuccessDialogOpen}
-      />
+      {mode === "create" && <CollectionCreatedDialog open={successDialogOpen} collectionId={createdCollectionId} onOpenChange={setSuccessDialogOpen} />}
     </>
   )
 }
+
+export const CreateCollection = () => <CollectionForm mode="create" onSubmit={createCollection} />
