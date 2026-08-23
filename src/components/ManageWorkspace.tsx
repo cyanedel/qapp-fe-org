@@ -93,7 +93,7 @@ export const ManageWorkspace = () => {
       await deleteWorkspace(workspaceId)
       const refreshedUser = await getCurrentUser()
       setUser(refreshedUser)
-      setActiveWorkspaceId(refreshedUser.org?.[0]?.org_id ?? null)
+      useAuthStore.getState().setActiveWorkspaceId(refreshedUser.org?.[0]?.org_id ?? null)
       navigate("/workspaces")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete workspace.")
