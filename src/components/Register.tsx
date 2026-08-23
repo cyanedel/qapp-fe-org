@@ -1,4 +1,4 @@
-import type React from "react"
+import type { SubmitEvent } from "react"
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { AlertCircle, CheckCircle2, Eye, EyeOff, Lock, Mail, UserPlus } from "lucide-react"
@@ -25,7 +25,7 @@ export const Register = () => {
     return () => window.clearTimeout(redirectTimer)
   }, [navigate, registered])
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError(null)
 

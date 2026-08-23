@@ -1,6 +1,6 @@
 import { env } from "@/config/env"
 import { collectAccessLogInfo } from "@/lib/accessLogInfo"
-import type { User } from "@/types"
+import type { User } from "@/types/auth"
 
 export const AUTH_SESSION_EXPIRED_EVENT = "qapp-auth-session-expired"
 

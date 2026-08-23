@@ -1,21 +1,6 @@
 import { getCurrentUser, handleAuthResponse } from "@/api/auth"
 import { env } from "@/config/env"
-
-export interface Workspace {
-  org_id: string
-  display_name?: string | null
-  org_logo?: string | null
-  description?: string | null
-  representatives: string[]
-  created_at?: string
-  updated_at?: string
-}
-
-export interface WorkspacePayload {
-  display_name: string
-  org_logo?: string | null
-  description?: string | null
-}
+import type { Workspace, WorkspacePayload } from "@/types/workspace"
 
 const parseResponse = async (response: Response, fallbackMessage: string) => {
   handleAuthResponse(response)
@@ -28,17 +13,28 @@ const parseResponse = async (response: Response, fallbackMessage: string) => {
   return data
 }
 
+const workspaceCache = new Map<string, Promise<Workspace>>()
+
 export const listWorkspacesFromSession = async () => {
   const user = await getCurrentUser()
   return { user, workspaces: user.org ?? [] }
 }
 
 export const getWorkspace = async (workspaceId: string): Promise<Workspace> => {
-  const response = await fetch(`${env.API_URL}/org/organization/${encodeURIComponent(workspaceId)}`, {
-    credentials: "include",
-  })
-  const data = await parseResponse(response, "Failed to load workspace")
-  return data.organization ?? data
+  const cachedWorkspace = workspaceCache.get(workspaceId)
+  if (cachedWorkspace) return cachedWorkspace
+
+  const request = (async () => {
+    const response = await fetch(`${env.API_URL}/org/organization/${encodeURIComponent(workspaceId)}`, {
+      credentials: "include",
+    })
+    const data = await parseResponse(response, "Failed to load workspace")
+    return (data.organization ?? data) as Workspace
+  })()
+
+  workspaceCache.set(workspaceId, request)
+  request.catch(() => workspaceCache.delete(workspaceId))
+  return request
 }
 
 export const createWorkspace = async (payload: WorkspacePayload): Promise<Workspace> => {
@@ -60,10 +56,13 @@ export const updateWorkspace = async (workspaceId: string, payload: Partial<Work
     body: JSON.stringify(payload),
   })
   const data = await parseResponse(response, "Failed to update workspace")
-  return data.organization ?? data
+  const workspace = (data.organization ?? data) as Workspace
+  workspaceCache.set(workspaceId, Promise.resolve(workspace))
+  return workspace
 }
 
 export const deleteWorkspace = async (workspaceId: string) => {
+  workspaceCache.delete(workspaceId)
   const response = await fetch(`${env.API_URL}/org/organization/${encodeURIComponent(workspaceId)}`, {
     method: "DELETE",
     credentials: "include",

@@ -1,4 +1,5 @@
 import type React from "react"
+import type { SubmitEvent } from "react"
 import { useMemo, useRef, useState } from "react"
 import { ReactSortable } from "react-sortablejs"
 import { AlertCircle, ChevronDown, FileUp, GripVertical, Plus, Save, Trash2 } from "lucide-react"
@@ -205,7 +206,7 @@ export const CreateCollection = () => {
     return null
   }
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError(null)
     setSuccessDialogOpen(false)

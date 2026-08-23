@@ -1,20 +1,22 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react"
+import { useEffect, useMemo, useState, type SubmitEvent } from "react"
 import { AlertCircle, ArrowLeft, Building2, Save, ShieldAlert, Trash2 } from "lucide-react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { getCurrentUser } from "@/api/auth"
-import { deleteWorkspace, getWorkspace, updateWorkspace, type Workspace } from "@/api/workspace"
+import { deleteWorkspace, getWorkspace, updateWorkspace } from "@/api/workspace"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { useAuthStore } from "@/store/useAuthStore"
+import type { Workspace } from "@/types/workspace"
 
 export const ManageWorkspace = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>()
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
   const setUser = useAuthStore((state) => state.setUser)
+  const setActiveWorkspaceId = useAuthStore((state) => state.setActiveWorkspaceId)
   const [workspace, setWorkspace] = useState<Workspace | null>(null)
   const [name, setName] = useState("")
   const [logo, setLogo] = useState("")
@@ -47,7 +49,6 @@ export const ManageWorkspace = () => {
         setName(data.display_name || "")
         setLogo(data.org_logo || "")
         setDescription(data.description || "")
-        useAuthStore.getState().setActiveWorkspaceId(workspaceId)
       } catch (err) {
         if (isMounted) setError(err instanceof Error ? err.message : "Failed to load workspace.")
       } finally {
@@ -60,7 +61,7 @@ export const ManageWorkspace = () => {
     }
   }, [workspaceId])
 
-  const handleSave = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSave = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!workspaceId || !isRepresentative) return
     if (!name.trim()) {
@@ -93,7 +94,7 @@ export const ManageWorkspace = () => {
       await deleteWorkspace(workspaceId)
       const refreshedUser = await getCurrentUser()
       setUser(refreshedUser)
-      useAuthStore.getState().setActiveWorkspaceId(refreshedUser.org?.[0]?.org_id ?? null)
+      setActiveWorkspaceId(refreshedUser.org?.[0]?.org_id ?? null)
       navigate("/workspaces")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete workspace.")

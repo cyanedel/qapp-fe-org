@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react"
+import { useState, type SubmitEvent } from "react"
 import { ArrowLeft, Building2, Save } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { getCurrentUser } from "@/api/auth"
@@ -20,7 +20,7 @@ export const CreateWorkspace = () => {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault()
     const trimmedName = name.trim()
     if (!trimmedName) {
