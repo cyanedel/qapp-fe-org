@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 export const Workspaces = () => {
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
+  const activeWorkspaceId = useAuthStore((state) => state.activeWorkspaceId)
   const setActiveWorkspaceId = useAuthStore((state) => state.setActiveWorkspaceId)
   const workspaces = user?.org ?? []
 
@@ -32,20 +33,24 @@ export const Workspaces = () => {
         <Card><CardContent className="flex min-h-56 flex-col items-center justify-center gap-3 text-center"><Building2 className="h-8 w-8 text-muted-foreground" /><p className="text-sm text-muted-foreground">You do not have a workspace yet.</p><Button asChild><Link to="/workspaces/create">Create workspace</Link></Button></CardContent></Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
-          {workspaces.map((workspace) => (
-            <Card key={workspace.org_id} className="transition-shadow hover:shadow-md">
+          {workspaces.map((workspace) => {
+            const isActive = workspace.org_id === activeWorkspaceId
+
+            return (
+            <Card key={workspace.org_id} className={`transition-shadow hover:shadow-md ${isActive ? "border-primary bg-primary/5 ring-1 ring-primary/30" : ""}`}>
               <CardHeader>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex min-w-0 items-center gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><Building2 className="h-5 w-5" /></div>
-                    <div className="min-w-0"><CardTitle className="truncate">{workspace.display_name || "Untitled workspace"}</CardTitle><CardDescription className="mt-1">Workspace</CardDescription></div>
+                    <div className="min-w-0"><CardTitle className="truncate">{workspace.display_name || "Untitled workspace"}</CardTitle><CardDescription className="mt-1">{isActive ? "Active workspace" : "Workspace"}</CardDescription></div>
                   </div>
                   <Button type="button" variant="outline" onClick={() => openWorkspace(workspace.org_id)}><Settings2 className="h-4 w-4" />Manage</Button>
                 </div>
               </CardHeader>
               <CardContent><p className="line-clamp-3 text-sm text-muted-foreground">{workspace.description || "No workspace description yet."}</p></CardContent>
             </Card>
-          ))}
+            )
+          })}
           <Card className="border-dashed transition-colors hover:border-primary/50 hover:bg-muted/30">
             <Link to="/workspaces/create" className="flex h-full min-h-40 flex-col items-center justify-center gap-3 p-6 text-center">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">

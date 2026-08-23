@@ -66,7 +66,7 @@ export const CollectionDetailsCard = ({ values, disabled = false, onChange }: Co
             value={values.accessType}
             onChange={(event) => onChange({ ...values, accessType: event.target.value as CollectionAccessType })}
             disabled={disabled}
-            className="h-10 w-full rounded-md border border-transparent bg-input/50 px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-10 w-full rounded-md border border-transparent bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&>option]:bg-background [&>option]:text-foreground"
           >
             <option value="public">Public</option>
             <option value="premium">Premium</option>
