@@ -1,13 +1,14 @@
 import { getCurrentUser, handleAuthResponse } from "@/api/auth"
 import { env } from "@/config/env"
 import type { Workspace, WorkspacePayload } from "@/types/workspace"
+import { ApiError } from "@/api/response"
 
 const parseResponse = async (response: Response, fallbackMessage: string) => {
   handleAuthResponse(response)
   const data = await response.json()
 
   if (!response.ok) {
-    throw new Error(data.error || fallbackMessage)
+    throw new ApiError(data, fallbackMessage)
   }
 
   return data

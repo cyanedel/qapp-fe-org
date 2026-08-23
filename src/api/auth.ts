@@ -1,13 +1,17 @@
 import { env } from "@/config/env"
 import { collectAccessLogInfo } from "@/lib/accessLogInfo"
 import type { User } from "@/types/auth"
+import { ApiError } from "@/api/response"
 
 export const AUTH_SESSION_EXPIRED_EVENT = "qapp-auth-session-expired"
 
 export class AuthError extends Error {
-  constructor(message = "Your session has expired. Please sign in again.") {
+  readonly code: string
+
+  constructor(message = "Your session has expired. Please sign in again.", code = "AUTH_INVALID_SESSION") {
     super(message)
     this.name = "AuthError"
+    this.code = code
   }
 }
 
@@ -28,7 +32,7 @@ export const loginUser = async (email: string, password: string) => {
   const data = await response.json()
 
   if (!response.ok) {
-    throw new Error(data.error || "Failed to login")
+    throw new ApiError(data, "Failed to login")
   }
 
   return data
@@ -47,7 +51,7 @@ export const registerUser = async (email: string, password: string) => {
   const data = await response.json()
 
   if (!response.ok) {
-    throw new Error(data.error || "Failed to register account")
+    throw new ApiError(data, "Failed to register account")
   }
 
   return data
@@ -63,9 +67,10 @@ export const getCurrentUser = async (): Promise<User> => {
 
   if (!response.ok) {
     if (response.status === 401) {
-      throw new AuthError(data.error)
+      const error = new ApiError(data, "Failed to load user profile")
+      throw new AuthError(error.message, error.code)
     }
-    throw new Error(data.error || "Failed to load user profile")
+    throw new ApiError(data, "Failed to load user profile")
   }
 
   return data.user ?? data
@@ -101,7 +106,7 @@ export const logoutUser = async () => {
   const data = await response.json()
 
   if (!response.ok) {
-    throw new Error(data.error || "Failed to logout")
+    throw new ApiError(data, "Failed to logout")
   }
 
   return data

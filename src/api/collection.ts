@@ -1,5 +1,6 @@
 import { handleAuthResponse } from "@/api/auth"
 import { env } from "@/config/env"
+import { ApiError } from "@/api/response"
 
 export interface CreateQuestionItem {
   questionText: string
@@ -21,7 +22,8 @@ export interface CreateCollectionPayload {
 export type CollectionAccessType = "public" | "premium" | "public_org" | "grant_org"
 
 export interface CreateCollectionResponse {
-  message?: string
+  code: string
+  message: string
   collection_id?: string
 }
 
@@ -46,7 +48,7 @@ export const getOrgCollectionList = async (orgId: string): Promise<CollectionSum
   const data = await response.json()
 
   if (!response.ok) {
-    throw new Error(data.error || "Failed to load collections")
+    throw new ApiError(data, "Failed to load collections")
   }
 
   return data.data ?? []
@@ -66,7 +68,7 @@ export const createCollection = async (payload: CreateCollectionPayload): Promis
   const data = await response.json()
 
   if (!response.ok) {
-    throw new Error(data.error || "Failed to create collection")
+    throw new ApiError(data, "Failed to create collection")
   }
 
   return data
@@ -110,7 +112,7 @@ const requestCollectionMutation = async (url: string, method: "PATCH" | "POST" |
   handleAuthResponse(response)
   const data = await response.json()
   if (!response.ok) {
-    throw new Error(data.error || "Collection operation failed")
+    throw new ApiError(data, "Collection operation failed")
   }
   return data
 }
@@ -122,7 +124,7 @@ export const listCollectionMaintainers = async (collectionId: string): Promise<C
   const response = await fetch(`${env.API_URL}/org/collection/${collectionId}/maintainer/list`, { credentials: "include" })
   handleAuthResponse(response)
   const data = await response.json()
-  if (!response.ok) throw new Error(data.error || "Failed to load maintainers")
+  if (!response.ok) throw new ApiError(data, "Failed to load maintainers")
   return data.maintainers ?? data.data ?? []
 }
 
@@ -136,7 +138,7 @@ export const listOrganizationAccessTags = async (orgId: string): Promise<Collect
   const response = await fetch(`${env.API_URL}/org/organization/${orgId}/access-tag/list`, { credentials: "include" })
   handleAuthResponse(response)
   const data = await response.json()
-  if (!response.ok) throw new Error(data.error || "Failed to load access tags")
+  if (!response.ok) throw new ApiError(data, "Failed to load access tags")
   return data.access_tags ?? data.data ?? []
 }
 
@@ -144,7 +146,7 @@ export const listCollectionAccessTags = async (collectionId: string): Promise<Co
   const response = await fetch(`${env.API_URL}/org/collection/${collectionId}/access-tag/list`, { credentials: "include" })
   handleAuthResponse(response)
   const data = await response.json()
-  if (!response.ok) throw new Error(data.error || "Failed to load collection access tags")
+  if (!response.ok) throw new ApiError(data, "Failed to load collection access tags")
   return data.access_tags ?? data.data ?? []
 }
 
@@ -158,7 +160,7 @@ export const listCollectionUserGrants = async (collectionId: string): Promise<Co
   const response = await fetch(`${env.API_URL}/org/collection/${collectionId}/user-grant/list`, { credentials: "include" })
   handleAuthResponse(response)
   const data = await response.json()
-  if (!response.ok) throw new Error(data.error || "Failed to load collection grants")
+  if (!response.ok) throw new ApiError(data, "Failed to load collection grants")
   return data.user_grants ?? data.grants ?? data.data ?? []
 }
 
