@@ -35,6 +35,7 @@ export const ManageWorkspace = () => {
 
   useEffect(() => {
     let isMounted = true
+
     if (!workspaceId) {
       setError("Workspace not found.")
       setLoading(false)
@@ -55,7 +56,9 @@ export const ManageWorkspace = () => {
         if (isMounted) setLoading(false)
       }
     }
+
     loadWorkspace()
+
     return () => {
       isMounted = false
     }
