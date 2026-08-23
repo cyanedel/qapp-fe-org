@@ -38,11 +38,13 @@ const createBlankQuestion = (): QuestionForm => ({
 
 export const CreateCollection = () => {
   const user = useAuthStore((state) => state.user)
+  const activeWorkspaceId = useAuthStore((state) => state.activeWorkspaceId)
   const importFileInputRef = useRef<HTMLInputElement>(null)
   const [details, setDetails] = useState<CollectionDetailsValues>({
     title: "",
     description: "",
-    tags: "",
+    searchTags: "",
+    accessType: "public",
     maxAttempts: "0",
   })
   const [questions, setQuestions] = useState<QuestionForm[]>([createBlankQuestion()])
@@ -58,13 +60,13 @@ export const CreateCollection = () => {
 
   const parsedTags = useMemo(
     () =>
-      details.tags
+      details.searchTags
         .split(",")
         .map((tag) => tag.trim())
         .filter(Boolean),
-    [details.tags]
+    [details.searchTags]
   )
-  const workspaceId = user?.org?.[0]?.org_id || user?.org_id?.[0] || ""
+  const workspaceId = activeWorkspaceId || user?.org?.[0]?.org_id || user?.org_id?.[0] || ""
 
   const hasQuestionContent = questions.some(
     (question) => question.questionText.trim() || question.options.some((option) => option.trim())
@@ -221,7 +223,8 @@ export const CreateCollection = () => {
         org_id: workspaceId,
         title: details.title.trim(),
         description: details.description.trim() || null,
-        tags: parsedTags,
+        search_tags: parsedTags,
+        access_type: details.accessType,
         max_attempts: Number(details.maxAttempts),
         questions: questions.map((question) => ({
           questionText: question.questionText.trim(),
@@ -232,7 +235,7 @@ export const CreateCollection = () => {
 
       setCreatedCollectionId(response.collection_id)
       setSuccessDialogOpen(true)
-      setDetails({ title: "", description: "", tags: "", maxAttempts: "0" })
+      setDetails({ title: "", description: "", searchTags: "", accessType: "public", maxAttempts: "0" })
       setQuestions([createBlankQuestion()])
       setCollapsedQuestionIds([])
       setSelectedImportFileName(null)

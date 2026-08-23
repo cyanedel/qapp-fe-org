@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react"
 import { AlertCircle, FolderPlus, Tags } from "lucide-react"
 import { Link } from "react-router-dom"
-import { getCollectionList, type CollectionSummary } from "@/api/collection"
+import { getOrgCollectionList, type CollectionSummary } from "@/api/collection"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
+import { useAuthStore } from "@/store/useAuthStore"
 
 export const CollectionList = () => {
+  const activeWorkspaceId = useAuthStore((state) => state.activeWorkspaceId)
   const [collections, setCollections] = useState<CollectionSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -18,8 +20,15 @@ export const CollectionList = () => {
       setLoading(true)
       setError(null)
 
+      if (!activeWorkspaceId) {
+        setCollections([])
+        setError("No organization selected.")
+        setLoading(false)
+        return
+      }
+
       try {
-        const data = await getCollectionList()
+        const data = await getOrgCollectionList(activeWorkspaceId)
         if (isMounted) {
           setCollections(data)
         }
@@ -39,7 +48,7 @@ export const CollectionList = () => {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [activeWorkspaceId])
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 py-8">
@@ -92,9 +101,15 @@ export const CollectionList = () => {
                   </p>
                 </div>
 
-                {collection.tags && collection.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex items-center rounded-md border bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                    {collection.access_type || "public"}
+                  </span>
+                </div>
+
+                {collection.search_tags && collection.search_tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {collection.tags.map((tag, index) => (
+                    {collection.search_tags.map((tag, index) => (
                       <span
                         key={`${collection.collectionid}-${tag}-${index}`}
                         className="inline-flex items-center gap-1 rounded-md border bg-muted px-2 py-1 text-xs font-medium text-muted-foreground"

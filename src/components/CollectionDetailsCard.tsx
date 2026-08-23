@@ -1,11 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import type { CollectionAccessType } from "@/api/collection"
 
 export interface CollectionDetailsValues {
   title: string
   description: string
-  tags: string
+  searchTags: string
+  accessType: CollectionAccessType
   maxAttempts: string
 }
 
@@ -47,14 +49,30 @@ export const CollectionDetailsCard = ({ values, disabled = false, onChange }: Co
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="collection-tags">Tags, separated by commas</Label>
+          <Label htmlFor="collection-search-tags">Search tags, separated by commas</Label>
           <Input
-            id="collection-tags"
-            value={values.tags}
-            onChange={(event) => onChange({ ...values, tags: event.target.value })}
+            id="collection-search-tags"
+            value={values.searchTags}
+            onChange={(event) => onChange({ ...values, searchTags: event.target.value })}
             placeholder="math, grade 7, placement"
             disabled={disabled}
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="collection-access-type">Access type</Label>
+          <select
+            id="collection-access-type"
+            value={values.accessType}
+            onChange={(event) => onChange({ ...values, accessType: event.target.value as CollectionAccessType })}
+            disabled={disabled}
+            className="h-10 w-full rounded-md border border-transparent bg-input/50 px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="public">Public</option>
+            <option value="premium">Premium</option>
+            <option value="public_org">Organization members</option>
+            <option value="grant_org">Organization grant</option>
+          </select>
         </div>
 
         <div className="space-y-2">
