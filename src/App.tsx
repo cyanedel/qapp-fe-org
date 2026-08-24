@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from "react-router-dom"
 import { AUTH_SESSION_EXPIRED_EVENT, validateCurrentSession } from "@/api/auth"
-import { AuthNav } from "@/components/AuthNav"
 import { CollectionList } from "@/components/CollectionList"
 import { CreateCollection } from "@/components/CreateCollection"
 import { EditCollection } from "@/components/EditCollection"
@@ -99,17 +98,8 @@ function App() {
         <main className="flex-1">
           <Routes>
             <Route element={<PublicOnlyRoute />}>
-              <Route
-                element={
-                  <>
-                    <AuthNav />
-                    <Outlet />
-                  </>
-                }
-              >
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-              </Route>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
             </Route>
 
             <Route element={<ProtectedRoute />}>

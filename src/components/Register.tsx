@@ -49,7 +49,17 @@ export const Register = () => {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-transparent px-4 pt-20 pb-6 dark:bg-background">
-      <Card className="w-full max-w-md border-amber-900/15 bg-[#FFF4CC]/90 shadow-2xl shadow-amber-950/15 backdrop-blur-md ring-amber-900/5 dark:border-border/50 dark:bg-card/95 dark:shadow-black/40 dark:ring-foreground/10">
+      <Card className="grid w-full max-w-4xl overflow-hidden border-amber-900/15 bg-[#FFF4CC]/90 shadow-2xl shadow-amber-950/15 backdrop-blur-md ring-amber-900/5 dark:border-border/50 dark:bg-card/95 dark:shadow-black/40 dark:ring-foreground/10 lg:grid-cols-2">
+        <section className="hidden flex-col justify-between bg-amber-900/5 p-10 dark:bg-muted lg:flex">
+          <div>
+            <img src="/potero_text.svg" alt="Potero" className="h-8 w-auto" />
+            <h2 className="mt-16 text-4xl font-semibold leading-tight tracking-tight">Set up your organization.</h2>
+            <p className="mt-5 max-w-sm text-base leading-7 text-muted-foreground">Create an account to start managing your workspace, collections, and team activity.</p>
+          </div>
+          <p className="text-sm text-muted-foreground">Potero for organizations</p>
+        </section>
+
+        <div className="min-w-0">
         {registered ? (
           <>
             <CardHeader className="space-y-2 pb-6 text-center">
@@ -149,6 +159,7 @@ export const Register = () => {
             </form>
           </>
         )}
+        </div>
       </Card>
     </div>
   )

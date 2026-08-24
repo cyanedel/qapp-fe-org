@@ -1,7 +1,7 @@
 import type { SubmitEvent } from "react"
 import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { getCurrentUser, loginUser } from "@/api/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -57,8 +57,18 @@ export const Login = () => {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-transparent px-4 pt-20 pb-6 dark:bg-background">
-      <Card className="w-full max-w-md border-amber-900/15 bg-[#FFF4CC]/90 shadow-2xl shadow-amber-950/15 backdrop-blur-md ring-amber-900/5 dark:border-border/50 dark:bg-card/95 dark:shadow-black/40 dark:ring-foreground/10">
+    <div className="relative flex min-h-screen items-center justify-center bg-transparent px-4 py-10 dark:bg-background">
+      <Card className="grid w-full max-w-4xl overflow-hidden border-amber-900/15 bg-[#FFF4CC]/90 shadow-2xl shadow-amber-950/15 backdrop-blur-md ring-amber-900/5 dark:border-border/50 dark:bg-card/95 dark:shadow-black/40 dark:ring-foreground/10 lg:grid-cols-2">
+        <section className="hidden flex-col justify-between bg-amber-900/5 p-10 dark:bg-muted lg:flex">
+          <div>
+            <img src="/potero_text.svg" alt="Potero" className="h-8 w-auto" />
+            <h2 className="mt-16 text-4xl font-semibold leading-tight tracking-tight">Welcome to your workspace.</h2>
+            <p className="mt-5 max-w-sm text-base leading-7 text-muted-foreground">Manage collections, coordinate your team, and keep your organization’s work in one place.</p>
+          </div>
+          <p className="text-sm text-muted-foreground">Potero for organizations</p>
+        </section>
+
+        <div className="min-w-0">
         <CardHeader className="space-y-2 pb-6 text-center">
           <CardTitle className="text-2xl font-bold tracking-tight">Welcome back</CardTitle>
           <CardDescription>Sign in to your Potero creator account.</CardDescription>
@@ -123,25 +133,32 @@ export const Login = () => {
             </Button>
           </CardContent>
 
-          <CardFooter className="flex flex-col gap-2 border-t border-amber-900/10 pt-4 text-center dark:border-border/40">
-            <p className="text-xs font-medium text-muted-foreground">Quick Demo Account</p>
-            <div className="grid w-full grid-cols-3 gap-2">
-              {demoAccounts.map((account) => (
-                <Button
-                  key={account.email}
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="w-full px-2"
-                  onClick={() => handleQuickFill(account)}
-                >
-                  {account.label}
-                </Button>
-              ))}
-            </div>
+          <CardFooter className="justify-center border-t border-amber-900/10 pt-4 text-center text-sm text-muted-foreground dark:border-border/40">
+            <span>
+              Need an organization account?{" "}
+              <Link to="/register" className="font-semibold text-primary underline-offset-4 hover:underline">
+                Register
+              </Link>
+            </span>
           </CardFooter>
         </form>
+        </div>
       </Card>
+
+      <div className="fixed bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-lg border border-amber-900/15 bg-[#FFF4CC]/95 p-2 shadow-lg shadow-amber-950/10 backdrop-blur-md dark:border-border dark:bg-card/95">
+        {demoAccounts.map((account) => (
+          <Button
+            key={account.email}
+            type="button"
+            variant="outline"
+            size="sm"
+            className="px-3"
+            onClick={() => handleQuickFill(account)}
+          >
+            {account.label}
+          </Button>
+        ))}
+      </div>
     </div>
   )
 }
