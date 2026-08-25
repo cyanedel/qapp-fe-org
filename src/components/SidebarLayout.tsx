@@ -93,6 +93,33 @@ export const SidebarLayout = () => {
           <div className="space-y-1">
             <Button
               type="button"
+              variant={location.pathname.startsWith("/workspaces") ? "secondary" : "ghost"}
+              className={cn("w-full justify-start", !isSidebarOpen && "justify-center px-0")}
+              onClick={() => {
+                if (!isSidebarOpen) {
+                  navigate("/workspaces")
+                  return
+                }
+                setIsWorkspacesMenuOpen((current) => !current)
+              }}
+              aria-expanded={isWorkspacesMenuOpen}
+              aria-controls="workspaces-sidebar-menu"
+              title={t("sidebar.workspaces")}
+            >
+              <Users className="h-4 w-4" />
+              {isSidebarOpen && <><span className="flex-1 text-left">{t("sidebar.workspaces")}</span><ChevronDown className={cn("h-4 w-4 transition-transform", !isWorkspacesMenuOpen && "-rotate-90")} /></>}
+            </Button>
+            {isSidebarOpen && isWorkspacesMenuOpen && (
+              <div id="workspaces-sidebar-menu" className="space-y-1 pl-4">
+                <SidebarLink to="/workspaces" icon={<List className="h-4 w-4" />} label={t("sidebar.allWorkspaces")} isOpen={isSidebarOpen} active={location.pathname === "/workspaces"} />
+                <SidebarLink to="/workspaces/members" icon={<Users className="h-4 w-4" />} label={t("sidebar.members")} isOpen={isSidebarOpen} active={location.pathname === "/workspaces/members"} />
+                <SidebarLink to="/workspaces/create" icon={<Plus className="h-4 w-4" />} label={t("sidebar.createNew")} isOpen={isSidebarOpen} active={location.pathname === "/workspaces/create"} />
+              </div>
+            )}
+          </div>
+          <div className="space-y-1">
+            <Button
+              type="button"
               variant={isCollectionsRoute ? "secondary" : "ghost"}
               className={cn("w-full justify-start", !isSidebarOpen && "justify-center px-0")}
               onClick={() => {
@@ -119,33 +146,6 @@ export const SidebarLayout = () => {
               <div id="collections-sidebar-menu" className="space-y-1 pl-4">
                 <SidebarLink to="/collections" icon={<List className="h-4 w-4" />} label={t("sidebar.listCollections")} isOpen={isSidebarOpen} active={location.pathname === "/collections"} />
                 <SidebarLink to="/collections/create" icon={<FolderPlus className="h-4 w-4" />} label={t("sidebar.createNew")} isOpen={isSidebarOpen} active={location.pathname === "/collections/create"} />
-              </div>
-            )}
-          </div>
-          <div className="space-y-1">
-            <Button
-              type="button"
-              variant={location.pathname.startsWith("/workspaces") ? "secondary" : "ghost"}
-              className={cn("w-full justify-start", !isSidebarOpen && "justify-center px-0")}
-              onClick={() => {
-                if (!isSidebarOpen) {
-                  navigate("/workspaces")
-                  return
-                }
-                setIsWorkspacesMenuOpen((current) => !current)
-              }}
-              aria-expanded={isWorkspacesMenuOpen}
-              aria-controls="workspaces-sidebar-menu"
-              title={t("sidebar.workspaces")}
-            >
-              <Users className="h-4 w-4" />
-              {isSidebarOpen && <><span className="flex-1 text-left">{t("sidebar.workspaces")}</span><ChevronDown className={cn("h-4 w-4 transition-transform", !isWorkspacesMenuOpen && "-rotate-90")} /></>}
-            </Button>
-            {isSidebarOpen && isWorkspacesMenuOpen && (
-              <div id="workspaces-sidebar-menu" className="space-y-1 pl-4">
-                <SidebarLink to="/workspaces" icon={<List className="h-4 w-4" />} label={t("sidebar.allWorkspaces")} isOpen={isSidebarOpen} active={location.pathname === "/workspaces"} />
-                <SidebarLink to="/workspaces/members" icon={<Users className="h-4 w-4" />} label={t("sidebar.members")} isOpen={isSidebarOpen} active={location.pathname === "/workspaces/members"} />
-                <SidebarLink to="/workspaces/create" icon={<Plus className="h-4 w-4" />} label={t("sidebar.createNew")} isOpen={isSidebarOpen} active={location.pathname === "/workspaces/create"} />
               </div>
             )}
           </div>
