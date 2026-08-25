@@ -1,6 +1,7 @@
 import type React from "react"
 import type { SubmitEvent } from "react"
 import { useMemo, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { ReactSortable } from "react-sortablejs"
 import { AlertCircle, ChevronDown, FileUp, GripVertical, Plus, Save, Trash2 } from "lucide-react"
 import { createCollection, type CollectionAccessType, type CollectionEditData } from "@/api/collection"
@@ -60,6 +61,7 @@ const createBlankQuestion = (): QuestionForm => ({
 })
 
 export const CollectionForm = ({ mode, initialCollection, onSubmit, onSuccess }: CollectionFormProps) => {
+  const { t } = useTranslation()
   const user = useAuthStore((state) => state.user)
   const activeWorkspaceId = useAuthStore((state) => state.activeWorkspaceId)
   const importFileInputRef = useRef<HTMLInputElement>(null)
@@ -171,9 +173,8 @@ export const CollectionForm = ({ mode, initialCollection, onSubmit, onSuccess }:
       setQuestions(nextQuestions)
       setCollapsedQuestionIds([])
       setSelectedImportFileName(file.name)
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to parse the selected file."
-      setError(errorMessage)
+    } catch {
+      setError(t("collectionFormExtras.parseFailed"))
     } finally {
       setParsingImport(false)
     }
@@ -186,7 +187,7 @@ export const CollectionForm = ({ mode, initialCollection, onSubmit, onSuccess }:
     setError(null)
 
     if (!isSupportedCollectionImport(file.name)) {
-      setError("Choose a JSON, CSV, or Excel (.xlsx) file.")
+      setError(t("collectionFormExtras.invalidFile"))
       event.target.value = ""
       return
     }
@@ -218,21 +219,21 @@ export const CollectionForm = ({ mode, initialCollection, onSubmit, onSuccess }:
   }
 
   const validateForm = () => {
-    if (!details.title.trim()) return "Collection title is required."
-    if (mode === "create" && !workspaceId) return "A workspace is required to create a collection."
-    if (questions.length === 0) return "Add at least one question."
+    if (!details.title.trim()) return t("collectionFormExtras.titleRequired")
+    if (mode === "create" && !workspaceId) return t("collectionFormExtras.workspaceRequired")
+    if (questions.length === 0) return t("collectionFormExtras.questionRequired")
 
     const invalidQuestionIndex = questions.findIndex((question) => {
       return !question.questionText.trim() || question.options.some((option) => !option.trim())
     })
 
     if (invalidQuestionIndex >= 0) {
-      return `Question ${invalidQuestionIndex + 1} needs text and all option fields.`
+      return t("collectionFormValidation.questionIncomplete", { number: invalidQuestionIndex + 1 })
     }
 
     const maxAttemptsNumber = Number(details.maxAttempts)
     if (!Number.isInteger(maxAttemptsNumber) || maxAttemptsNumber < 0) {
-      return "Max attempts must be a whole number of 0 or greater."
+      return t("collectionFormExtras.attemptsInvalid")
     }
 
     return null
@@ -277,9 +278,8 @@ export const CollectionForm = ({ mode, initialCollection, onSubmit, onSuccess }:
         if (importFileInputRef.current) importFileInputRef.current.value = ""
       }
       onSuccess?.(response.collection_id)
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : `Failed to ${mode} collection.`
-      setError(errorMessage)
+    } catch {
+      setError(t("collectionFormExtras.saveFailed"))
     } finally {
       setLoading(false)
     }
@@ -289,10 +289,10 @@ export const CollectionForm = ({ mode, initialCollection, onSubmit, onSuccess }:
     <>
       <div className="mx-auto flex w-full max-w-5xl min-w-0 flex-col gap-6 overflow-x-hidden px-6 py-8">
       <div className="min-w-0 space-y-2">
-        <p className="text-sm font-medium text-primary">Collections</p>
-        <h1 className="text-3xl font-bold tracking-tight">{mode === "create" ? "Create question collection" : "Edit question collection"}</h1>
+        <p className="text-sm font-medium text-primary">{t("collections.eyebrow")}</p>
+        <h1 className="text-3xl font-bold tracking-tight">{mode === "create" ? t("collectionForm.createTitle") : t("collectionForm.editTitle")}</h1>
         <p className="max-w-2xl text-sm text-muted-foreground">
-          {mode === "create" ? "Build" : "Update"} a collection with a title, tags, attempt limit, and multiple-choice questions.
+          {t("collectionForm.description", { action: mode === "create" ? t("collectionForm.build") : t("collectionForm.update") })}
         </p>
       </div>
 
@@ -308,11 +308,11 @@ export const CollectionForm = ({ mode, initialCollection, onSubmit, onSuccess }:
 
         <Card>
           <CardHeader>
-            <CardTitle>Import questions</CardTitle>
+            <CardTitle>{t("collectionForm.importTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-2">
-              <Label htmlFor="collection-import-file">Question file</Label>
+              <Label htmlFor="collection-import-file">{t("collectionForm.questionFile")}</Label>
               <input
                 ref={importFileInputRef}
                 id="collection-import-file"
@@ -323,21 +323,21 @@ export const CollectionForm = ({ mode, initialCollection, onSubmit, onSuccess }:
                 className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-primary-foreground hover:file:bg-primary/80 disabled:pointer-events-none disabled:opacity-50"
               />
               <p className="text-xs text-muted-foreground">
-                Choose a JSON, CSV, or Excel (.xlsx) file. Imported questions will replace the current question list after confirmation.
+                {t("collectionForm.importHelp")}
               </p>
             </div>
 
             {parsingImport && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground" role="status">
                 <Spinner className="size-4" />
-                Reading question file...
+                {t("collectionForm.readingFile")}
               </div>
             )}
 
             {selectedImportFileName && !parsingImport && (
               <div className="flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-sm">
                 <FileUp className="h-4 w-4 text-primary" />
-                <span className="truncate">Loaded {selectedImportFileName}</span>
+                <span className="truncate">{t("collectionForm.loaded", { name: selectedImportFileName })}</span>
               </div>
             )}
           </CardContent>
@@ -364,8 +364,8 @@ export const CollectionForm = ({ mode, initialCollection, onSubmit, onSuccess }:
                     <span
                       className="question-drag-handle flex h-8 w-8 shrink-0 cursor-grab items-center justify-center rounded-md text-muted-foreground hover:bg-muted active:cursor-grabbing"
                       role="button"
-                      aria-label={`Drag question ${questionIndex + 1}`}
-                      title={`Drag question ${questionIndex + 1}`}
+                      aria-label={t("collectionFormExtras.dragQuestion", { number: questionIndex + 1 })}
+                      title={t("collectionFormExtras.dragQuestion", { number: questionIndex + 1 })}
                       tabIndex={0}
                     >
                       <GripVertical className="h-4 w-4" />
@@ -384,7 +384,7 @@ export const CollectionForm = ({ mode, initialCollection, onSubmit, onSuccess }:
                       />
                       <span className="min-w-0 flex-1 overflow-hidden">
                         <CardTitle className="text-base leading-snug">
-                          Question {questionIndex + 1}
+                          {t("collectionForm.question", { number: questionIndex + 1 })}
                         </CardTitle>
                         {question.questionText.trim() && (
                           <span className="mt-1 block max-w-full whitespace-normal text-sm leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
@@ -401,8 +401,8 @@ export const CollectionForm = ({ mode, initialCollection, onSubmit, onSuccess }:
                       size="icon"
                       onClick={() => removeQuestion(questionIndex)}
                       disabled={loading || questions.length === 1}
-                      aria-label={`Remove question ${questionIndex + 1}`}
-                      title={`Remove question ${questionIndex + 1}`}
+                      aria-label={t("collectionFormExtras.removeQuestion", { number: questionIndex + 1 })}
+                      title={t("collectionFormExtras.removeQuestion", { number: questionIndex + 1 })}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -413,12 +413,12 @@ export const CollectionForm = ({ mode, initialCollection, onSubmit, onSuccess }:
                   className={`min-w-0 space-y-4 overflow-hidden ${collapsedQuestionIds.includes(question.id) ? "hidden" : ""}`}
                 >
                   <div className="space-y-2">
-                    <Label htmlFor={`question-${question.id}`}>Question text</Label>
+                    <Label htmlFor={`question-${question.id}`}>{t("collectionForm.questionText")}</Label>
                     <textarea
                       id={`question-${question.id}`}
                       value={question.questionText}
                       onChange={(event) => updateQuestion(questionIndex, event.target.value)}
-                      placeholder="Write the question"
+                      placeholder={t("collectionForm.questionPlaceholder")}
                       disabled={loading}
                       wrap="soft"
                       className="min-h-24 w-full min-w-0 resize-y overflow-x-hidden rounded-md border border-transparent bg-input/50 px-3 py-2 text-sm whitespace-pre-wrap break-words outline-none transition-[color,box-shadow,background-color] [overflow-wrap:anywhere] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
@@ -438,12 +438,12 @@ export const CollectionForm = ({ mode, initialCollection, onSubmit, onSuccess }:
                             className="h-4 w-4 accent-primary"
                             disabled={loading}
                           />
-                          Correct option {optionIndex + 1}
+                          {t("collectionForm.correctOption", { number: optionIndex + 1 })}
                         </span>
                         <Input
                           value={option}
                           onChange={(event) => updateOption(questionIndex, optionIndex, event.target.value)}
-                          placeholder={`Option ${optionIndex + 1}`}
+                          placeholder={t("collectionForm.option", { number: optionIndex + 1 })}
                           disabled={loading}
                           required
                         />
@@ -459,40 +459,40 @@ export const CollectionForm = ({ mode, initialCollection, onSubmit, onSuccess }:
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
           <Button type="button" variant="outline" size="lg" onClick={addQuestion} disabled={loading}>
             <Plus className="h-4 w-4" />
-            Add Question
+            {t("collectionForm.addQuestion")}
           </Button>
 
           <Button type="submit" size="lg" disabled={loading}>
             {loading ? (
               <>
                 <Spinner className="mr-2 size-4" />
-                {mode === "create" ? "Creating..." : "Saving..."}
+                {mode === "create" ? t("collectionForm.creating") : t("collectionForm.saving")}
               </>
             ) : (
               <>
                 <Save className="h-4 w-4" />
-                {mode === "create" ? "Create Collection" : "Save Changes"}
+                {mode === "create" ? t("collectionForm.create") : t("collectionForm.save")}
               </>
             )}
           </Button>
         </div>
       </form>
       </div>
-      <OperationOverlay open={loading} message={mode === "create" ? "Creating collection..." : "Saving collection..."} />
+      <OperationOverlay open={loading} message={mode === "create" ? t("collectionFormExtras.creatingOverlay") : t("collectionFormExtras.savingOverlay")} />
       <Dialog open={importWarningOpen} onOpenChange={handleImportWarningChange}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Replace current questions?</DialogTitle>
+            <DialogTitle>{t("collectionFormExtras.replaceTitle")}</DialogTitle>
             <DialogDescription>
-              Importing this file will replace the questions currently entered on this page. Your collection details will not be changed.
+              {t("collectionFormExtras.replaceDescription")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => handleImportWarningChange(false)} disabled={parsingImport}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button type="button" onClick={() => void handleConfirmImport()} disabled={parsingImport}>
-              Import file
+              {t("collectionFormExtras.importFile")}
             </Button>
           </DialogFooter>
         </DialogContent>
