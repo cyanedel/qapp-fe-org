@@ -3,6 +3,7 @@ import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from "react
 import { useTranslation } from "react-i18next"
 import { AUTH_SESSION_EXPIRED_EVENT, validateCurrentSession } from "@/api/auth"
 import { CollectionList } from "@/components/CollectionList"
+import { CollectionView } from "@/components/CollectionView"
 import { CreateCollection } from "@/components/CreateCollection"
 import { EditCollection } from "@/components/EditCollection"
 import { Home } from "@/components/Home"
@@ -111,6 +112,7 @@ function App() {
                 <Route path="/home" element={<Home />} />
                 <Route path="/collections" element={<CollectionList />} />
                 <Route path="/collections/create" element={<CreateCollection />} />
+                <Route path="/collections/:collectionId" element={<CollectionView />} />
                 <Route path="/collections/:collectionId/edit" element={<EditCollection />} />
                 <Route path="/workspaces" element={<Workspaces />} />
                 <Route path="/workspaces/create" element={<CreateWorkspace />} />

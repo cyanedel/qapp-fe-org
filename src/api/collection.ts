@@ -32,10 +32,14 @@ export interface CollectionQuestion {
   id?: number
   questionText: string
   options: string[]
+  correctAnswer?: number
+}
+
+export interface EditableCollectionQuestion extends CollectionQuestion {
   correctAnswer: number
 }
 
-export interface CollectionEditData {
+export interface CollectionData {
   collection_id: string
   org_id?: string | null
   title: string
@@ -44,12 +48,17 @@ export interface CollectionEditData {
   access_type: CollectionAccessType
   max_attempts?: number | null
   questions: CollectionQuestion[]
+  can_edit: boolean
+}
+
+export interface CollectionEditData extends CollectionData {
+  questions: EditableCollectionQuestion[]
 }
 
 export interface UpdateCollectionPayload {
   title: string
   description: string | null
-  questions: CollectionQuestion[]
+  questions: EditableCollectionQuestion[]
   search_tags: string[]
   access_type: CollectionAccessType
   max_attempts: number
@@ -180,7 +189,7 @@ export const getCollectionEditPermission = async (collectionId: string): Promise
   return data
 }
 
-export const getCollectionForEdit = async (collectionId: string): Promise<CollectionEditData> => {
+export const getCollection = async (collectionId: string): Promise<CollectionData> => {
   const response = await fetch(`${env.API_URL}/org/collection/${collectionId}`, { credentials: "include" })
   handleAuthResponse(response)
   const data = await response.json()

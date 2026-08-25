@@ -57,8 +57,6 @@ export const CollectionList = () => {
     }
   }, [activeWorkspaceId, t])
 
-  const editableCollections = collections.filter((collection) => collection.can_edit)
-
   const handleDelete = async () => {
     if (!collectionPendingDelete) return
 
@@ -110,7 +108,7 @@ export const CollectionList = () => {
             {t("collections.loading")}
           </CardContent>
         </Card>
-      ) : editableCollections.length === 0 ? (
+      ) : collections.length === 0 ? (
         <Card>
           <CardContent className="flex min-h-56 items-center justify-center text-center text-sm text-muted-foreground">
             {t("collections.empty")}
@@ -118,20 +116,20 @@ export const CollectionList = () => {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
-          {editableCollections.map((collection) => (
+          {collections.map((collection) => (
             <Card
               key={collection.collectionid}
               className="group relative cursor-pointer transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               role="link"
               tabIndex={0}
-              onClick={() => navigate(`/collections/${collection.collectionid}/edit`)}
+              onClick={() => navigate(`/collections/${collection.collectionid}${collection.can_edit ? "/edit" : ""}`)}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault()
-                  navigate(`/collections/${collection.collectionid}/edit`)
+                  navigate(`/collections/${collection.collectionid}${collection.can_edit ? "/edit" : ""}`)
                 }
               }}
-              aria-label={t("collections.edit", { title: collection.title })}
+              aria-label={collection.can_edit ? t("collections.edit", { title: collection.title }) : t("collections.view", { title: collection.title })}
             >
               <CardContent className="space-y-4 pt-6">
                 <div className="space-y-2 pr-10">
@@ -161,7 +159,7 @@ export const CollectionList = () => {
                   </div>
                 )}
               </CardContent>
-              <div className="absolute right-3 top-3">
+              {collection.can_edit && <div className="absolute right-3 top-3">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -206,7 +204,7 @@ export const CollectionList = () => {
                     </button>
                   </div>
                 )}
-              </div>
+              </div>}
             </Card>
           ))}
         </div>

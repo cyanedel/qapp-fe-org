@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { AlertCircle } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { CollectionForm } from "@/components/CreateCollection"
-import { getCollectionForEdit, updateCollection, type CollectionEditData } from "@/api/collection"
+import { getCollection, updateCollection, type CollectionEditData } from "@/api/collection"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
@@ -27,8 +27,12 @@ export const EditCollection = () => {
       }
 
       try {
-        const data = await getCollectionForEdit(collectionId)
-        if (isMounted) setCollection(data)
+        const data = await getCollection(collectionId)
+        if (!data.can_edit) {
+          navigate(`/collections/${collectionId}`, { replace: true })
+          return
+        }
+        if (isMounted) setCollection(data as CollectionEditData)
       } catch (err) {
         if (isMounted) setError(t("collections.loadFailed"))
       } finally {
@@ -40,7 +44,7 @@ export const EditCollection = () => {
     return () => {
       isMounted = false
     }
-  }, [collectionId, t])
+  }, [collectionId, navigate, t])
 
   if (loading) {
     return (
