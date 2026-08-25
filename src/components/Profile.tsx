@@ -1,30 +1,32 @@
 import type React from "react"
 import { useMemo } from "react"
 import { CalendarDays, IdCard, Mail, User as UserIcon } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuthStore } from "@/store/useAuthStore"
 
 export const Profile = () => {
+  const { t, i18n } = useTranslation()
   const user = useAuthStore((state) => state.user)
-  const displayName = user?.display_name || user?.username || "Workspace user"
+  const displayName = user?.display_name || user?.username || t("profile.fallbackName")
   const avatarInitial = displayName.charAt(0).toUpperCase()
 
   const joinedDate = useMemo(() => {
     if (!user?.created_at) return "-"
 
-    return new Intl.DateTimeFormat("en", {
+    return new Intl.DateTimeFormat(i18n.language, {
       year: "numeric",
       month: "long",
       day: "numeric",
     }).format(new Date(user.created_at))
-  }, [user?.created_at])
+  }, [i18n.language, user?.created_at])
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-6 py-8">
       <div className="space-y-2">
-        <p className="text-sm font-medium text-primary">Profile</p>
-        <h1 className="text-3xl font-bold tracking-tight">Profile information</h1>
-        <p className="text-sm text-muted-foreground">View your workspace account details.</p>
+        <p className="text-sm font-medium text-primary">{t("profile.eyebrow")}</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("profile.title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("profile.description")}</p>
       </div>
 
       <Card className="border-border/50 shadow-lg">
@@ -39,16 +41,16 @@ export const Profile = () => {
             )}
             <div>
               <CardTitle className="text-2xl font-semibold">{displayName}</CardTitle>
-              <CardDescription>{user?.email || "Account details will appear here."}</CardDescription>
+              <CardDescription>{user?.email || t("profile.detailsPending")}</CardDescription>
             </div>
           </div>
         </CardHeader>
 
         <CardContent className="grid gap-4 pt-6 sm:grid-cols-2">
-          <ProfileField icon={<IdCard className="h-4 w-4" />} label="Real name" value={user?.real_name} />
-          <ProfileField icon={<UserIcon className="h-4 w-4" />} label="Username" value={user?.username} />
-          <ProfileField icon={<Mail className="h-4 w-4" />} label="Email address" value={user?.email} />
-          <ProfileField icon={<CalendarDays className="h-4 w-4" />} label="Joined" value={joinedDate} />
+          <ProfileField icon={<IdCard className="h-4 w-4" />} label={t("profile.realName")} value={user?.real_name} />
+          <ProfileField icon={<UserIcon className="h-4 w-4" />} label={t("profile.username")} value={user?.username} />
+          <ProfileField icon={<Mail className="h-4 w-4" />} label={t("profile.email")} value={user?.email} />
+          <ProfileField icon={<CalendarDays className="h-4 w-4" />} label={t("profile.joined")} value={joinedDate} />
         </CardContent>
       </Card>
     </div>

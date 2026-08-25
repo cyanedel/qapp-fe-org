@@ -1,7 +1,10 @@
 {
   "languageSelector": { "label": "语言", "selected": "已选择" },
   "languages": { "en": "English", "id": "Indonesia", "ko": "한국어", "zh-CN": "简体中文" },
-  "app": { "name": "柏特洛" },
+  "app": { "name": "柏特洛", "checkingSession": "正在检查会话…" },
+  "sidebar": { "user": "用户", "noWorkspace": "暂无工作区", "untitledWorkspace": "未命名工作区", "collapse": "收起侧边栏", "expand": "展开侧边栏", "toggle": "切换侧边栏", "mainNavigation": "主导航", "home": "首页", "collections": "题集", "listCollections": "题集列表", "createNew": "新建", "workspaces": "工作区", "allWorkspaces": "所有工作区", "members": "成员", "settings": "设置", "profile": "个人资料", "logout": "退出登录", "openProfileMenu": "打开个人资料菜单", "selectWorkspace": "选择工作区", "workspace": "工作区", "createWorkspace": "新建工作区" },
+  "home": { "eyebrow": "首页", "title": "欢迎来到{{appName}}", "description": "在此仪表板中管理工作区和创作者活动。", "collections": "题集", "questions": "题目", "members": "成员" },
+  "profile": { "fallbackName": "工作区用户", "eyebrow": "个人资料", "title": "个人资料信息", "description": "查看您的工作区账户详情。", "detailsPending": "账户详情将显示在这里。", "realName": "真实姓名", "username": "用户名", "email": "电子邮箱", "joined": "加入时间" },
   "common": { "emailAddress": "电子邮箱", "password": "密码" },
   "login": { "heroTitle": "欢迎来到您的工作区。", "heroDescription": "管理题集、协调团队，并将组织工作集中在一处。", "heroFooter": "面向组织的 柏特洛", "title": "欢迎回来", "description": "登录您的 {{appName}} 创作者账户。", "emailPlaceholder": "name@example.com", "passwordPlaceholder": "输入您的密码", "showPassword": "显示密码", "hidePassword": "隐藏密码", "signIn": "登录", "signingIn": "正在登录…", "noAccount": "需要组织账户？", "createAccount": "注册", "demoAccount": "创作者 {{number}}", "validation": { "emailRequired": "请输入您的电子邮箱。", "emailInvalid": "请输入有效的电子邮箱。", "passwordRequired": "请输入您的密码。" } },
   "register": { "heroTitle": "设置您的组织。", "heroDescription": "创建账户以开始管理工作区、题集和团队活动。", "heroFooter": "面向组织的 柏特洛", "successTitle": "注册成功", "successDescription": "您的组织账户已准备就绪。将在 {{seconds}} 秒后跳转至登录页。", "goToSignIn": "前往登录", "title": "创建组织账户", "description": "注册以管理 {{appName}} 创作者工具。", "emailPlaceholder": "name@example.com", "passwordPlaceholder": "输入您的密码", "showPassword": "显示密码", "hidePassword": "隐藏密码", "creating": "正在创建账户…", "register": "注册", "hasAccount": "已有账户？", "signIn": "登录", "validation": { "emailRequired": "请输入您的电子邮箱。", "emailInvalid": "请输入有效的电子邮箱。", "passwordRequired": "请输入您的密码。" } },

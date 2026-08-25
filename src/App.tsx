@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import { AUTH_SESSION_EXPIRED_EVENT, validateCurrentSession } from "@/api/auth"
 import { CollectionList } from "@/components/CollectionList"
 import { CreateCollection } from "@/components/CreateCollection"
@@ -19,6 +20,7 @@ import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/store/useAuthStore"
 
 function App() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { isAuthenticated, logout, setUser } = useAuthStore()
@@ -72,7 +74,7 @@ function App() {
 
   const ProtectedRoute = () => {
     if (!authChecked) {
-      return <AuthLoading />
+      return <AuthLoading label={t("app.checkingSession")} />
     }
 
     return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace state={{ from: location }} />
@@ -80,7 +82,7 @@ function App() {
 
   const PublicOnlyRoute = () => {
     if (!authChecked) {
-      return <AuthLoading />
+      return <AuthLoading label={t("app.checkingSession")} />
     }
 
     return isAuthenticated ? <Navigate to="/home" replace /> : <Outlet />
@@ -126,10 +128,10 @@ function App() {
   )
 }
 
-const AuthLoading = () => (
+const AuthLoading = ({ label }: { label: string }) => (
   <div className="flex min-h-64 items-center justify-center text-muted-foreground">
     <Spinner className="mr-2 size-5" />
-    Checking session...
+    {label}
   </div>
 )
 

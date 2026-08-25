@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { AlertCircle } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { CollectionForm } from "@/components/CreateCollection"
 import { getCollectionForEdit, updateCollection, type CollectionEditData } from "@/api/collection"
 import { Button } from "@/components/ui/button"
@@ -8,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
 
 export const EditCollection = () => {
+  const { t } = useTranslation()
   const { collectionId = "" } = useParams()
   const navigate = useNavigate()
   const [collection, setCollection] = useState<CollectionEditData | null>(null)
@@ -19,7 +21,7 @@ export const EditCollection = () => {
 
     const loadCollection = async () => {
       if (!collectionId) {
-        setError("Collection ID is required.")
+        setError(t("collections.notFound"))
         setLoading(false)
         return
       }
@@ -28,7 +30,7 @@ export const EditCollection = () => {
         const data = await getCollectionForEdit(collectionId)
         if (isMounted) setCollection(data)
       } catch (err) {
-        if (isMounted) setError(err instanceof Error ? err.message : "Failed to load collection.")
+        if (isMounted) setError(t("collections.loadFailed"))
       } finally {
         if (isMounted) setLoading(false)
       }
@@ -38,14 +40,14 @@ export const EditCollection = () => {
     return () => {
       isMounted = false
     }
-  }, [collectionId])
+  }, [collectionId, t])
 
   if (loading) {
     return (
       <Card className="mx-auto mt-8 max-w-5xl">
         <CardContent className="flex min-h-56 items-center justify-center text-sm text-muted-foreground">
           <Spinner className="mr-2 size-5" />
-          Loading collection...
+          {t("collections.loading")}
         </CardContent>
       </Card>
     )
@@ -56,11 +58,11 @@ export const EditCollection = () => {
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-6 py-8">
         <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
           <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>{error ?? "Collection not found."}</span>
+          <span>{error ?? t("collections.notFound")}</span>
         </div>
         <div>
           <Button variant="outline" onClick={() => navigate("/collections", { replace: true })}>
-            Back to collections
+            {t("collections.back")}
           </Button>
         </div>
       </div>

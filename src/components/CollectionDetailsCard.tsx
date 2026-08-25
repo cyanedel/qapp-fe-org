@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { CollectionAccessType } from "@/api/collection"
+import { useTranslation } from "react-i18next"
 
 export interface CollectionDetailsValues {
   title: string
@@ -18,49 +19,50 @@ interface CollectionDetailsCardProps {
 }
 
 export const CollectionDetailsCard = ({ values, disabled = false, onChange }: CollectionDetailsCardProps) => {
+  const { t } = useTranslation()
   return (
     <Card className="min-w-0 overflow-hidden">
       <CardHeader>
-        <CardTitle>Collection details</CardTitle>
+        <CardTitle>{t("collections.details")}</CardTitle>
       </CardHeader>
       <CardContent className="grid min-w-0 gap-4 md:grid-cols-2">
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="collection-title">Title</Label>
+          <Label htmlFor="collection-title">{t("collections.title")}</Label>
           <Input
             id="collection-title"
             value={values.title}
             onChange={(event) => onChange({ ...values, title: event.target.value })}
-            placeholder="Example: Basic math placement quiz"
+            placeholder={t("collections.titlePlaceholder")}
             disabled={disabled}
             required
           />
         </div>
 
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="collection-description">Description</Label>
+          <Label htmlFor="collection-description">{t("collections.description")}</Label>
           <textarea
             id="collection-description"
             value={values.description}
             onChange={(event) => onChange({ ...values, description: event.target.value })}
-            placeholder="Describe what this collection is for"
+            placeholder={t("collections.descriptionPlaceholder")}
             disabled={disabled}
             className="min-h-24 w-full min-w-0 resize-y rounded-md border border-transparent bg-input/50 px-3 py-2 text-sm break-words outline-none transition-[color,box-shadow,background-color] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="collection-search-tags">Search tags, separated by commas</Label>
+          <Label htmlFor="collection-search-tags">{t("collections.searchTags")}</Label>
           <Input
             id="collection-search-tags"
             value={values.searchTags}
             onChange={(event) => onChange({ ...values, searchTags: event.target.value })}
-            placeholder="math, grade 7, placement"
+            placeholder={t("collections.searchTagsPlaceholder")}
             disabled={disabled}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="collection-access-type">Access type</Label>
+          <Label htmlFor="collection-access-type">{t("collections.accessType")}</Label>
           <select
             id="collection-access-type"
             value={values.accessType}
@@ -68,15 +70,15 @@ export const CollectionDetailsCard = ({ values, disabled = false, onChange }: Co
             disabled={disabled}
             className="h-10 w-full rounded-md border border-transparent bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&>option]:bg-background [&>option]:text-foreground"
           >
-            <option value="public">Public</option>
-            <option value="premium">Premium</option>
-            <option value="public_org">Organization members</option>
-            <option value="grant_org">Organization grant</option>
+            <option value="public">{t("collections.public")}</option>
+            <option value="premium">{t("collections.premium")}</option>
+            <option value="public_org">{t("collections.organizationMembers")}</option>
+            <option value="grant_org">{t("collections.organizationGrant")}</option>
           </select>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="collection-max-attempts">Max attempts</Label>
+          <Label htmlFor="collection-max-attempts">{t("collections.maxAttempts")}</Label>
           <Input
             id="collection-max-attempts"
             type="number"
@@ -84,7 +86,7 @@ export const CollectionDetailsCard = ({ values, disabled = false, onChange }: Co
             step="1"
             value={values.maxAttempts}
             onChange={(event) => onChange({ ...values, maxAttempts: event.target.value })}
-            placeholder="0 means no limit"
+            placeholder={t("collections.maxAttemptsPlaceholder")}
             disabled={disabled}
           />
         </div>

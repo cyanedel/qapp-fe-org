@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { AlertCircle, Ellipsis, FolderPlus, Pencil, Tags, Trash2 } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import { deleteCollection, getOrgCollectionList, type CollectionSummary } from "@/api/collection"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -9,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useAuthStore } from "@/store/useAuthStore"
 
 export const CollectionList = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const activeWorkspaceId = useAuthStore((state) => state.activeWorkspaceId)
   const [collections, setCollections] = useState<CollectionSummary[]>([])
@@ -27,7 +29,7 @@ export const CollectionList = () => {
 
       if (!activeWorkspaceId) {
         setCollections([])
-        setError("No organization selected.")
+        setError(t("sidebar.noWorkspace"))
         setLoading(false)
         return
       }
@@ -39,7 +41,7 @@ export const CollectionList = () => {
         }
       } catch (err) {
         if (isMounted) {
-          setError(err instanceof Error ? err.message : "Failed to load collections.")
+          setError(t("collections.loadFailed"))
         }
       } finally {
         if (isMounted) {
@@ -53,7 +55,7 @@ export const CollectionList = () => {
     return () => {
       isMounted = false
     }
-  }, [activeWorkspaceId])
+  }, [activeWorkspaceId, t])
 
   const editableCollections = collections.filter((collection) => collection.can_edit)
 
@@ -69,7 +71,7 @@ export const CollectionList = () => {
       )
       setCollectionPendingDelete(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to remove collection.")
+      setError(t("collections.loadFailed"))
     } finally {
       setDeleting(false)
     }
@@ -79,17 +81,17 @@ export const CollectionList = () => {
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 py-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium text-primary">Collections</p>
-          <h1 className="text-3xl font-bold tracking-tight">List collections</h1>
+          <p className="text-sm font-medium text-primary">{t("collections.eyebrow")}</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("collections.listTitle")}</h1>
           <p className="max-w-2xl text-sm text-muted-foreground">
-            Browse existing question collections.
+            {t("collections.listDescription")}
           </p>
         </div>
 
         <Button asChild size="lg">
           <Link to="/collections/create">
             <FolderPlus className="h-4 w-4" />
-            Create New
+            {t("collections.createNew")}
           </Link>
         </Button>
       </div>
@@ -105,13 +107,13 @@ export const CollectionList = () => {
         <Card>
           <CardContent className="flex min-h-56 items-center justify-center text-center text-sm text-muted-foreground">
             <Spinner className="mr-2 size-5" />
-            Loading collections...
+            {t("collections.loading")}
           </CardContent>
         </Card>
       ) : editableCollections.length === 0 ? (
         <Card>
           <CardContent className="flex min-h-56 items-center justify-center text-center text-sm text-muted-foreground">
-            No editable collections found.
+            {t("collections.empty")}
           </CardContent>
         </Card>
       ) : (
@@ -129,19 +131,19 @@ export const CollectionList = () => {
                   navigate(`/collections/${collection.collectionid}/edit`)
                 }
               }}
-              aria-label={`Edit ${collection.title}`}
+              aria-label={t("collections.edit", { title: collection.title })}
             >
               <CardContent className="space-y-4 pt-6">
                 <div className="space-y-2 pr-10">
                   <h2 className="text-lg font-semibold tracking-tight text-foreground">{collection.title}</h2>
                   <p className="line-clamp-3 text-sm text-muted-foreground">
-                    {collection.description || "No description."}
+                    {collection.description || t("collections.noDescription")}
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
                   <span className="inline-flex items-center rounded-md border bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-                    {collection.access_type || "public"}
+                    {t(`collections.${collection.access_type || "public"}`)}
                   </span>
                 </div>
 
@@ -165,7 +167,7 @@ export const CollectionList = () => {
                   size="icon"
                   className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
                   data-state={collectionMenuOpen === collection.collectionid ? "open" : "closed"}
-                  aria-label={`Collection actions for ${collection.title}`}
+                  aria-label={t("collections.edit", { title: collection.title })}
                   aria-expanded={collectionMenuOpen === collection.collectionid}
                   onClick={(event) => {
                     event.stopPropagation()
@@ -187,7 +189,7 @@ export const CollectionList = () => {
                       onClick={() => navigate(`/collections/${collection.collectionid}/edit`)}
                     >
                       <Pencil className="h-4 w-4" />
-                      Edit
+                      {t("collections.edit")}
                     </button>
                     <div className="my-1 h-px bg-border" />
                     <button
@@ -200,7 +202,7 @@ export const CollectionList = () => {
                       }}
                     >
                       <Trash2 className="h-4 w-4" />
-                      Remove
+                      {t("collections.remove")}
                     </button>
                   </div>
                 )}
@@ -212,17 +214,17 @@ export const CollectionList = () => {
       <Dialog open={collectionPendingDelete !== null} onOpenChange={(open) => !open && !deleting && setCollectionPendingDelete(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Remove collection?</DialogTitle>
+            <DialogTitle>{t("collections.removeTitle")}</DialogTitle>
             <DialogDescription>
-              {collectionPendingDelete ? `“${collectionPendingDelete.title}” will be removed and can no longer be edited.` : ""}
+              {collectionPendingDelete ? t("collections.removeDescription", { title: collectionPendingDelete.title }) : ""}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCollectionPendingDelete(null)} disabled={deleting}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button variant="destructive" onClick={() => void handleDelete()} disabled={deleting}>
-              {deleting ? "Removing..." : "Remove collection"}
+              {deleting ? t("collections.removing") : t("collections.remove")}
             </Button>
           </DialogFooter>
         </DialogContent>
