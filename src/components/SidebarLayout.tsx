@@ -141,6 +141,7 @@ export const SidebarLayout = () => {
             {isSidebarOpen && isWorkspacesMenuOpen && (
               <div id="workspaces-sidebar-menu" className="space-y-1 pl-4">
                 <SidebarLink to="/workspaces" icon={<List className="h-4 w-4" />} label="All Workspaces" isOpen={isSidebarOpen} active={location.pathname === "/workspaces"} />
+                <SidebarLink to="/workspaces/members" icon={<Users className="h-4 w-4" />} label="Members" isOpen={isSidebarOpen} active={location.pathname === "/workspaces/members"} />
                 <SidebarLink to="/workspaces/create" icon={<Plus className="h-4 w-4" />} label="Create New" isOpen={isSidebarOpen} active={location.pathname === "/workspaces/create"} />
               </div>
             )}

@@ -12,6 +12,7 @@ import { SidebarLayout } from "@/components/SidebarLayout"
 import { Workspaces } from "@/components/Workspaces"
 import { CreateWorkspace } from "@/components/CreateWorkspace"
 import { ManageWorkspace } from "@/components/ManageWorkspace"
+import { WorkspaceMembers } from "@/components/WorkspaceMembers"
 import { ThemeProvider } from "@/components/ThemeProvider"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
@@ -112,6 +113,7 @@ function App() {
                 <Route path="/workspaces" element={<Workspaces />} />
                 <Route path="/workspaces/create" element={<CreateWorkspace />} />
                 <Route path="/workspaces/:workspaceId/manage" element={<ManageWorkspace />} />
+                <Route path="/workspaces/members" element={<WorkspaceMembers />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
             </Route>
