@@ -1,0 +1,9 @@
+{
+  "languageSelector": { "label": "언어", "selected": "선택됨" },
+  "languages": { "en": "English", "id": "Indonesia", "ko": "한국어", "zh-CN": "简体中文" },
+  "app": { "name": "포테로" },
+  "common": { "emailAddress": "이메일 주소", "password": "비밀번호" },
+  "login": { "heroTitle": "워크스페이스에 오신 것을 환영합니다.", "heroDescription": "컬렉션을 관리하고 팀을 조율하며 조직의 업무를 한곳에 보관하세요.", "heroFooter": "조직을 위한 포테로", "title": "다시 오신 것을 환영합니다", "description": "{{appName}} 크리에이터 계정으로 로그인하세요.", "emailPlaceholder": "name@example.com", "passwordPlaceholder": "비밀번호를 입력하세요", "showPassword": "비밀번호 표시", "hidePassword": "비밀번호 숨기기", "signIn": "로그인", "signingIn": "로그인하는 중...", "noAccount": "조직 계정이 필요하신가요?", "createAccount": "회원가입", "demoAccount": "크리에이터 {{number}}", "validation": { "emailRequired": "이메일 주소를 입력하세요.", "emailInvalid": "유효한 이메일 주소를 입력하세요.", "passwordRequired": "비밀번호를 입력하세요." } },
+  "register": { "heroTitle": "조직을 설정하세요.", "heroDescription": "계정을 만들어 워크스페이스, 컬렉션 및 팀 활동을 관리하세요.", "heroFooter": "조직을 위한 포테로", "successTitle": "회원가입이 완료되었습니다", "successDescription": "조직 계정이 준비되었습니다. {{seconds}}초 후 로그인 페이지로 이동합니다.", "goToSignIn": "로그인으로 이동", "title": "조직 계정 만들기", "description": "{{appName}} 크리에이터 도구를 관리하려면 가입하세요.", "emailPlaceholder": "name@example.com", "passwordPlaceholder": "비밀번호를 입력하세요", "showPassword": "비밀번호 표시", "hidePassword": "비밀번호 숨기기", "creating": "계정을 만드는 중...", "register": "회원가입", "hasAccount": "이미 계정이 있으신가요?", "signIn": "로그인", "validation": { "emailRequired": "이메일 주소를 입력하세요.", "emailInvalid": "유효한 이메일 주소를 입력하세요.", "passwordRequired": "비밀번호를 입력하세요." } },
+  "errors": { "generic": "문제가 발생했습니다. 다시 시도해 주세요.", "EMAIL_AND_PASSWORD_ARE_REQUIRED": "이메일과 비밀번호가 필요합니다.", "INVALID_EMAIL_OR_PASSWORD": "이메일 또는 비밀번호가 올바르지 않습니다.", "INVALID_REQUEST": "잘못된 요청입니다. 다시 시도해 주세요.", "INTERNAL_ERROR": "문제가 발생했습니다. 다시 시도해 주세요." }
+}

@@ -1,0 +1,9 @@
+{
+  "languageSelector": { "label": "语言", "selected": "已选择" },
+  "languages": { "en": "English", "id": "Indonesia", "ko": "한국어", "zh-CN": "简体中文" },
+  "app": { "name": "柏特洛" },
+  "common": { "emailAddress": "电子邮箱", "password": "密码" },
+  "login": { "heroTitle": "欢迎来到您的工作区。", "heroDescription": "管理题集、协调团队，并将组织工作集中在一处。", "heroFooter": "面向组织的 柏特洛", "title": "欢迎回来", "description": "登录您的 {{appName}} 创作者账户。", "emailPlaceholder": "name@example.com", "passwordPlaceholder": "输入您的密码", "showPassword": "显示密码", "hidePassword": "隐藏密码", "signIn": "登录", "signingIn": "正在登录…", "noAccount": "需要组织账户？", "createAccount": "注册", "demoAccount": "创作者 {{number}}", "validation": { "emailRequired": "请输入您的电子邮箱。", "emailInvalid": "请输入有效的电子邮箱。", "passwordRequired": "请输入您的密码。" } },
+  "register": { "heroTitle": "设置您的组织。", "heroDescription": "创建账户以开始管理工作区、题集和团队活动。", "heroFooter": "面向组织的 柏特洛", "successTitle": "注册成功", "successDescription": "您的组织账户已准备就绪。将在 {{seconds}} 秒后跳转至登录页。", "goToSignIn": "前往登录", "title": "创建组织账户", "description": "注册以管理 {{appName}} 创作者工具。", "emailPlaceholder": "name@example.com", "passwordPlaceholder": "输入您的密码", "showPassword": "显示密码", "hidePassword": "隐藏密码", "creating": "正在创建账户…", "register": "注册", "hasAccount": "已有账户？", "signIn": "登录", "validation": { "emailRequired": "请输入您的电子邮箱。", "emailInvalid": "请输入有效的电子邮箱。", "passwordRequired": "请输入您的密码。" } },
+  "errors": { "generic": "出现问题，请重试。", "EMAIL_AND_PASSWORD_ARE_REQUIRED": "需要电子邮箱和密码。", "INVALID_EMAIL_OR_PASSWORD": "电子邮箱或密码无效。", "INVALID_REQUEST": "请求无效，请重试。", "INTERNAL_ERROR": "出现问题，请重试。" }
+}

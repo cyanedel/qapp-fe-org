@@ -1,0 +1,57 @@
+{
+  "languageSelector": { "label": "Language", "selected": "Selected" },
+  "languages": { "en": "English", "id": "Indonesia", "ko": "한국어", "zh-CN": "简体中文" },
+  "app": { "name": "Potero" },
+  "common": { "emailAddress": "Email address", "password": "Password" },
+  "login": {
+    "heroTitle": "Welcome to your workspace.",
+    "heroDescription": "Manage collections, coordinate your team, and keep your organization’s work in one place.",
+    "heroFooter": "Potero for organizations",
+    "title": "Welcome back",
+    "description": "Sign in to your {{appName}} creator account.",
+    "emailPlaceholder": "name@example.com",
+    "passwordPlaceholder": "Enter your password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "noAccount": "Need an organization account?",
+    "createAccount": "Register",
+    "demoAccount": "Creator {{number}}",
+    "validation": {
+      "emailRequired": "Please enter your email address.",
+      "emailInvalid": "Enter a valid email address.",
+      "passwordRequired": "Please enter your password."
+    }
+  },
+  "register": {
+    "heroTitle": "Set up your organization.",
+    "heroDescription": "Create an account to start managing your workspace, collections, and team activity.",
+    "heroFooter": "Potero for organizations",
+    "successTitle": "Registration successful",
+    "successDescription": "Your organization account is ready. Redirecting to sign in in {{seconds}} seconds.",
+    "goToSignIn": "Go to Sign In",
+    "title": "Create organization account",
+    "description": "Register to manage {{appName}} creator tools.",
+    "emailPlaceholder": "name@example.com",
+    "passwordPlaceholder": "Enter your password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "creating": "Creating account...",
+    "register": "Register",
+    "hasAccount": "Already have an account?",
+    "signIn": "Sign In",
+    "validation": {
+      "emailRequired": "Please enter your email address.",
+      "emailInvalid": "Enter a valid email address.",
+      "passwordRequired": "Please enter your password."
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "EMAIL_AND_PASSWORD_ARE_REQUIRED": "Email and password are required.",
+    "INVALID_EMAIL_OR_PASSWORD": "Invalid email or password.",
+    "INVALID_REQUEST": "The request is invalid. Please try again.",
+    "INTERNAL_ERROR": "Something went wrong. Please try again."
+  }
+}

@@ -154,6 +154,18 @@ p {
   margin: 0;
 }
 
+.auth-hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 4rem;
+}
+
+.auth-hero-copy h2,
+.auth-hero-copy p {
+  margin: 0;
+}
+
 code,
 .counter {
   font-family: var(--mono);

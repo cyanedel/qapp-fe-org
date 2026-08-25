@@ -1,16 +1,21 @@
 import type { SubmitEvent } from "react"
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { AlertCircle, CheckCircle2, Eye, EyeOff, Lock, Mail, UserPlus } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import { AlertCircle, CheckCircle2, Eye, EyeOff, Lock, Mail } from "lucide-react"
 import { registerUser } from "@/api/auth"
+import { ApiError } from "@/api/response"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
+import { LanguageSelector } from "@/components/LanguageSelector"
 
 export const Register = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
+  const appName = t("app.name")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -29,18 +34,32 @@ export const Register = () => {
     event.preventDefault()
     setError(null)
 
-    if (!email || !password) {
-      setError("Email and password are required.")
+    const normalizedEmail = email.trim()
+
+    if (!normalizedEmail) {
+      setError(t("register.validation.emailRequired"))
+      return
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setError(t("register.validation.emailInvalid"))
+      return
+    }
+
+    if (!password) {
+      setError(t("register.validation.passwordRequired"))
       return
     }
 
     setLoading(true)
 
     try {
-      await registerUser(email, password)
+      await registerUser(normalizedEmail, password)
       setRegistered(true)
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Registration failed. Please try again."
+      const errorMessage = err instanceof ApiError
+        ? t(`errors.${err.code}`, { defaultValue: t("errors.generic") })
+        : t("errors.generic")
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -52,11 +71,13 @@ export const Register = () => {
       <Card className="grid w-full max-w-4xl overflow-hidden border-amber-900/15 bg-[#FFF4CC]/90 shadow-2xl shadow-amber-950/15 backdrop-blur-md ring-amber-900/5 dark:border-border/50 dark:bg-card/95 dark:shadow-black/40 dark:ring-foreground/10 lg:grid-cols-2">
         <section className="hidden flex-col justify-between bg-amber-900/5 p-10 dark:bg-muted lg:flex">
           <div>
-            <img src="/potero_text.svg" alt="Potero" className="h-8 w-auto" />
-            <h2 className="mt-16 text-4xl font-semibold leading-tight tracking-tight">Set up your organization.</h2>
-            <p className="mt-5 max-w-sm text-base leading-7 text-muted-foreground">Create an account to start managing your workspace, collections, and team activity.</p>
+            <span className="block text-4xl font-semibold tracking-[-0.06em] text-primary">{appName}</span>
+            <div className="auth-hero-copy">
+              <h2 className="text-4xl font-semibold leading-tight tracking-tight">{t("register.heroTitle")}</h2>
+              <p className="max-w-sm text-base leading-7 text-muted-foreground">{t("register.heroDescription")}</p>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">Potero for organizations</p>
+          <p className="text-sm text-muted-foreground">{t("register.heroFooter")}</p>
         </section>
 
         <div className="min-w-0">
@@ -66,26 +87,26 @@ export const Register = () => {
               <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
                 <CheckCircle2 className="h-6 w-6" />
               </div>
-              <CardTitle className="text-2xl font-bold tracking-tight">Registration successful</CardTitle>
-              <CardDescription>Your organization account is ready. Redirecting to sign in.</CardDescription>
+              <CardTitle className="text-2xl font-bold tracking-tight">{t("register.successTitle")}</CardTitle>
+              <CardDescription>{t("register.successDescription", { seconds: 5 })}</CardDescription>
             </CardHeader>
             <CardContent>
               <Button type="button" className="w-full font-medium" onClick={() => navigate("/login")}>
-                Go to Sign In
+                {t("register.goToSignIn")}
               </Button>
             </CardContent>
           </>
         ) : (
           <>
             <CardHeader className="space-y-2 pb-6 text-center">
-              <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
-                <UserPlus className="h-6 w-6" />
+              <div className="mx-auto mb-2 flex w-32 items-center justify-center">
+                <span className="text-3xl font-semibold tracking-[-0.06em] text-primary">{appName}</span>
               </div>
-              <CardTitle className="text-2xl font-bold tracking-tight">Create organization account</CardTitle>
-              <CardDescription>Register to manage Potero creator tools.</CardDescription>
+              <CardTitle className="text-2xl font-bold tracking-tight">{t("register.title")}</CardTitle>
+              <CardDescription>{t("register.description", { appName })}</CardDescription>
             </CardHeader>
 
-            <form onSubmit={handleSubmit}>
+            <form noValidate onSubmit={handleSubmit}>
               <CardContent className="space-y-4">
                 {error && (
                   <div className="flex items-center gap-2 rounded-md border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
@@ -95,13 +116,13 @@ export const Register = () => {
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="register-email">Email address</Label>
+                  <Label htmlFor="register-email">{t("common.emailAddress")}</Label>
                   <div className="relative">
                     <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       id="register-email"
                       type="email"
-                      placeholder="name@example.com"
+                      placeholder={t("register.emailPlaceholder")}
                       className="pl-9"
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
@@ -112,13 +133,13 @@ export const Register = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="register-password">Password</Label>
+                  <Label htmlFor="register-password">{t("common.password")}</Label>
                   <div className="relative">
                     <Lock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       id="register-password"
                       type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
+                      placeholder={t("register.passwordPlaceholder")}
                       className="pl-9 pr-10"
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
@@ -129,7 +150,7 @@ export const Register = () => {
                       type="button"
                       onClick={() => setShowPassword((current) => !current)}
                       className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={showPassword ? t("register.hidePassword") : t("register.showPassword")}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -140,19 +161,19 @@ export const Register = () => {
                   {loading ? (
                     <>
                       <Spinner className="mr-2 size-4" />
-                      Creating account...
+                      {t("register.creating")}
                     </>
                   ) : (
-                    "Register"
+                    t("register.register")
                   )}
                 </Button>
               </CardContent>
 
               <CardFooter className="flex flex-col gap-2 border-t border-amber-900/10 pt-4 text-center text-sm text-muted-foreground dark:border-border/40">
                 <span>
-                  Already have an account?{" "}
+                  {t("register.hasAccount")} {" "}
                   <Link to="/login" className="font-semibold text-primary underline-offset-4 hover:underline">
-                    Sign In
+                    {t("register.signIn")}
                   </Link>
                 </span>
               </CardFooter>
@@ -161,6 +182,7 @@ export const Register = () => {
         )}
         </div>
       </Card>
+      <LanguageSelector className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6" />
     </div>
   )
 }
