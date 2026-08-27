@@ -55,14 +55,19 @@ export interface CollectionEditData extends CollectionData {
   questions: EditableCollectionQuestion[]
 }
 
-export interface UpdateCollectionPayload {
+export interface UpdateCollectionSummaryPayload {
   title: string
-  description: string | null
-  questions: EditableCollectionQuestion[]
+  description: string
   search_tags: string[]
   access_type: CollectionAccessType
   max_attempts: number
 }
+
+export interface UpdateCollectionQuestionsPayload {
+  questions: EditableCollectionQuestion[]
+}
+
+export type UpdateCollectionPayload = UpdateCollectionSummaryPayload | UpdateCollectionQuestionsPayload
 
 export interface CollectionSummary {
   collectionid: string
@@ -197,7 +202,7 @@ export const getCollection = async (collectionId: string): Promise<CollectionDat
   return data.collection
 }
 
-export const updateCollection = async (collectionId: string, payload: UpdateCollectionPayload): Promise<CreateCollectionResponse> => {
+const patchCollection = async (collectionId: string, payload: UpdateCollectionPayload): Promise<CreateCollectionResponse> => {
   const response = await fetch(`${env.API_URL}/org/collection/${collectionId}/edit`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -209,6 +214,12 @@ export const updateCollection = async (collectionId: string, payload: UpdateColl
   if (!response.ok) throw new ApiError(data, "Failed to update collection")
   return data
 }
+
+export const updateCollectionSummary = async (collectionId: string, payload: UpdateCollectionSummaryPayload) =>
+  patchCollection(collectionId, payload)
+
+export const updateCollectionQuestions = async (collectionId: string, payload: UpdateCollectionQuestionsPayload) =>
+  patchCollection(collectionId, payload)
 
 export const listOrganizationAccessTags = async (orgId: string): Promise<CollectionAccessTag[]> => {
   const response = await fetch(`${env.API_URL}/org/organization/${orgId}/access-tag/list`, { credentials: "include" })

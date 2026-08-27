@@ -1,19 +1,23 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { AlertCircle } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { getCollection, updateCollectionSummary, type CollectionData } from "@/api/collection"
-import { CollectionSummaryForm } from "@/components/CollectionSummaryForm"
+import { AlertCircle } from "lucide-react"
+import {
+  getCollection,
+  updateCollectionQuestions,
+  type CollectionEditData,
+  type CollectionData,
+} from "@/api/collection"
+import { CollectionQuestionsForm } from "@/components/CollectionQuestionsForm"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
-import { collectionDetailsFromData, collectionSummaryPayload } from "@/lib/collectionForm"
 
-export const EditCollection = () => {
+export const EditCollectionQuestions = () => {
   const { t } = useTranslation()
   const { collectionId = "" } = useParams()
   const navigate = useNavigate()
-  const [collection, setCollection] = useState<CollectionData | null>(null)
+  const [collection, setCollection] = useState<CollectionEditData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -30,8 +34,11 @@ export const EditCollection = () => {
       try {
         const data = await getCollection(collectionId)
         if (!data.can_edit) {
-          navigate(`/collections/${collectionId}`, { replace: true })
+          navigate(`/collections/${collectionId}/questions`, { replace: true })
           return
+        }
+        if (!hasEditableQuestions(data)) {
+          throw new Error("Editable collection response did not include correct answers")
         }
         if (isMounted) setCollection(data)
       } catch {
@@ -73,14 +80,17 @@ export const EditCollection = () => {
   }
 
   return (
-    <CollectionSummaryForm
+    <CollectionQuestionsForm
       key={collection.collection_id}
       mode="edit"
-      initialValues={collectionDetailsFromData(collection)}
-      onSave={async (values) => {
-        await updateCollectionSummary(collection.collection_id, collectionSummaryPayload(values))
-      }}
-      onQuestions={() => navigate(`/collections/${collection.collection_id}/edit/questions`)}
+      collectionTitle={collection.title}
+      initialQuestions={collection.questions}
+      onBack={() => navigate(`/collections/${collection.collection_id}/edit`)}
+      onSubmit={(questions) => updateCollectionQuestions(collection.collection_id, { questions })}
+      onSuccess={() => navigate(`/collections/${collection.collection_id}/edit`, { replace: true })}
     />
   )
 }
+
+const hasEditableQuestions = (collection: CollectionData): collection is CollectionEditData =>
+  collection.questions.every((question) => typeof question.correctAnswer === "number")

@@ -8,11 +8,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useAuthStore } from "@/store/useAuthStore"
+import { useCollectionDraftStore } from "@/store/useCollectionDraftStore"
 
 export const CollectionList = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const activeWorkspaceId = useAuthStore((state) => state.activeWorkspaceId)
+  const clearCollectionDraft = useCollectionDraftStore((state) => state.clearDraft)
   const [collections, setCollections] = useState<CollectionSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -87,7 +89,7 @@ export const CollectionList = () => {
         </div>
 
         <Button asChild size="lg">
-          <Link to="/collections/create">
+          <Link to="/collections/create" onClick={clearCollectionDraft}>
             <FolderPlus className="h-4 w-4" />
             {t("collections.createNew")}
           </Link>

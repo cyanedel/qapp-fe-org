@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button"
 import { LanguageSelector } from "@/components/LanguageSelector"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/store/useAuthStore"
+import { useCollectionDraftStore } from "@/store/useCollectionDraftStore"
 
 export const SidebarLayout = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout, activeWorkspaceId, setActiveWorkspaceId } = useAuthStore()
+  const clearCollectionDraft = useCollectionDraftStore((state) => state.clearDraft)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [isHeaderUserMenuOpen, setIsHeaderUserMenuOpen] = useState(false)
@@ -58,6 +60,7 @@ export const SidebarLayout = () => {
       console.error("Logout failed:", err)
     }
 
+    clearCollectionDraft()
     logout()
     navigate("/login")
   }
@@ -145,7 +148,14 @@ export const SidebarLayout = () => {
             {isSidebarOpen && isCollectionsMenuOpen && (
               <div id="collections-sidebar-menu" className="space-y-1 pl-4">
                 <SidebarLink to="/collections" icon={<List className="h-4 w-4" />} label={t("sidebar.listCollections")} isOpen={isSidebarOpen} active={location.pathname === "/collections"} />
-                <SidebarLink to="/collections/create" icon={<FolderPlus className="h-4 w-4" />} label={t("sidebar.createNew")} isOpen={isSidebarOpen} active={location.pathname === "/collections/create"} />
+                <SidebarLink
+                  to="/collections/create"
+                  icon={<FolderPlus className="h-4 w-4" />}
+                  label={t("sidebar.createNew")}
+                  isOpen={isSidebarOpen}
+                  active={location.pathname.startsWith("/collections/create")}
+                  onClick={clearCollectionDraft}
+                />
               </div>
             )}
           </div>
@@ -332,15 +342,16 @@ interface SidebarLinkProps {
   label: string
   isOpen: boolean
   active: boolean
+  onClick?: () => void
 }
 
-const SidebarLink = ({ to, icon, label, isOpen, active }: SidebarLinkProps) => (
+const SidebarLink = ({ to, icon, label, isOpen, active, onClick }: SidebarLinkProps) => (
   <Button
     variant={active ? "secondary" : "ghost"}
     className={cn("w-full justify-start", !isOpen && "justify-center px-0")}
     asChild
   >
-    <Link to={to} title={label} aria-label={label}>
+    <Link to={to} title={label} aria-label={label} onClick={onClick}>
       {icon}
       {isOpen && <span>{label}</span>}
     </Link>

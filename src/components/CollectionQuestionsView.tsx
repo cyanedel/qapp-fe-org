@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react"
-import { ArrowLeft, Eye, List, Pencil } from "lucide-react"
+import { ArrowLeft, Eye, Pencil } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams } from "react-router-dom"
 import { getCollection, type CollectionData } from "@/api/collection"
-import { CollectionSummaryView } from "@/components/CollectionSummaryView"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
 
-export const CollectionView = () => {
+export const CollectionQuestionsView = () => {
   const { collectionId = "" } = useParams()
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -47,15 +47,22 @@ export const CollectionView = () => {
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 py-8">
-      <Button variant="ghost" className="-ml-2 w-fit" onClick={() => navigate("/collections")}>
+      <Button
+        variant="ghost"
+        className="-ml-2 w-fit"
+        onClick={() => navigate(`/collections/${collection.collection_id}`)}
+      >
         <ArrowLeft className="h-4 w-4" />
-        {t("collections.back")}
+        {t("collectionFlow.backToSummary")}
       </Button>
 
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div>
           <p className="text-sm font-medium text-primary">{t("collections.eyebrow")}</p>
-          <h1 className="text-3xl font-bold tracking-tight">{collection.title}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("collectionFlow.questionsFor", { title: collection.title })}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("collections.questionCount", { count: collection.questions.length })}
+          </p>
         </div>
         {!collection.can_edit && (
           <span className="inline-flex w-fit items-center gap-2 rounded-md bg-muted px-3 py-1.5 text-sm text-muted-foreground">
@@ -65,20 +72,32 @@ export const CollectionView = () => {
         )}
       </div>
 
-      <CollectionSummaryView collection={collection} />
-
-      <div className="flex flex-col justify-end gap-3 sm:flex-row">
-        {collection.can_edit && (
-          <Button variant="outline" onClick={() => navigate(`/collections/${collection.collection_id}/edit`)}>
-            <Pencil className="h-4 w-4" />
-            {t("collectionFlow.editSummary")}
-          </Button>
-        )}
-        <Button onClick={() => navigate(`/collections/${collection.collection_id}/questions`)}>
-          <List className="h-4 w-4" />
-          {t("collectionFlow.viewQuestions")}
-        </Button>
+      <div className="space-y-3">
+        {collection.questions.map((question, index) => (
+          <Card key={question.id ?? index}>
+            <CardContent className="pt-6">
+              <p className="font-medium">
+                {index + 1}. {question.questionText}
+              </p>
+              <ol className="mt-3 list-inside list-decimal space-y-1 text-sm text-muted-foreground">
+                {question.options.map((option, optionIndex) => (
+                  <li key={optionIndex}>{option}</li>
+                ))}
+              </ol>
+            </CardContent>
+          </Card>
+        ))}
       </div>
+
+      {collection.can_edit && (
+        <Button
+          className="self-end"
+          onClick={() => navigate(`/collections/${collection.collection_id}/edit/questions`)}
+        >
+          <Pencil className="h-4 w-4" />
+          {t("collectionFlow.editQuestions")}
+        </Button>
+      )}
     </div>
   )
 }

@@ -4,8 +4,11 @@ import { useTranslation } from "react-i18next"
 import { AUTH_SESSION_EXPIRED_EVENT, validateCurrentSession } from "@/api/auth"
 import { CollectionList } from "@/components/CollectionList"
 import { CollectionView } from "@/components/CollectionView"
+import { CollectionQuestionsView } from "@/components/CollectionQuestionsView"
 import { CreateCollection } from "@/components/CreateCollection"
+import { CreateCollectionQuestions } from "@/components/CreateCollectionQuestions"
 import { EditCollection } from "@/components/EditCollection"
+import { EditCollectionQuestions } from "@/components/EditCollectionQuestions"
 import { Home } from "@/components/Home"
 import { Login } from "@/components/Login"
 import { Profile } from "@/components/Profile"
@@ -19,12 +22,14 @@ import { ThemeProvider } from "@/components/ThemeProvider"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/store/useAuthStore"
+import { useCollectionDraftStore } from "@/store/useCollectionDraftStore"
 
 function App() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { isAuthenticated, logout, setUser } = useAuthStore()
+  const clearCollectionDraft = useCollectionDraftStore((state) => state.clearDraft)
   const [authChecked, setAuthChecked] = useState(false)
 
   useEffect(() => {
@@ -40,6 +45,7 @@ function App() {
         if (!isMounted) return
 
         console.error("Failed to validate session:", err)
+        clearCollectionDraft()
         logout()
       } finally {
         if (isMounted) {
@@ -53,17 +59,18 @@ function App() {
     return () => {
       isMounted = false
     }
-  }, [logout, setUser])
+  }, [clearCollectionDraft, logout, setUser])
 
   useEffect(() => {
     const handleSessionExpired = () => {
+      clearCollectionDraft()
       logout()
       navigate("/login", { replace: true })
     }
 
     window.addEventListener(AUTH_SESSION_EXPIRED_EVENT, handleSessionExpired)
     return () => window.removeEventListener(AUTH_SESSION_EXPIRED_EVENT, handleSessionExpired)
-  }, [logout, navigate])
+  }, [clearCollectionDraft, logout, navigate])
 
   useEffect(() => {
     const isLoginRoute = location.pathname === "/login" || location.pathname === "/register"
@@ -112,8 +119,11 @@ function App() {
                 <Route path="/home" element={<Home />} />
                 <Route path="/collections" element={<CollectionList />} />
                 <Route path="/collections/create" element={<CreateCollection />} />
+                <Route path="/collections/create/questions" element={<CreateCollectionQuestions />} />
                 <Route path="/collections/:collectionId" element={<CollectionView />} />
+                <Route path="/collections/:collectionId/questions" element={<CollectionQuestionsView />} />
                 <Route path="/collections/:collectionId/edit" element={<EditCollection />} />
+                <Route path="/collections/:collectionId/edit/questions" element={<EditCollectionQuestions />} />
                 <Route path="/workspaces" element={<Workspaces />} />
                 <Route path="/workspaces/create" element={<CreateWorkspace />} />
                 <Route path="/workspaces/:workspaceId/manage" element={<ManageWorkspace />} />

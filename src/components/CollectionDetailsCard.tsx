@@ -2,15 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { CollectionAccessType } from "@/api/collection"
+import type { CollectionDetailsValues } from "@/types/collection"
 import { useTranslation } from "react-i18next"
-
-export interface CollectionDetailsValues {
-  title: string
-  description: string
-  searchTags: string
-  accessType: CollectionAccessType
-  maxAttempts: string
-}
 
 interface CollectionDetailsCardProps {
   values: CollectionDetailsValues
