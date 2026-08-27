@@ -34,7 +34,7 @@ export const useAuthStore = create<AuthState>()(
       logout: () => set({ user: null, isAuthenticated: false, activeWorkspaceId: null }),
     }),
     {
-      name: "qapp-org-auth-storage",
+      name: "potero-org-auth-storage",
     }
   )
 )

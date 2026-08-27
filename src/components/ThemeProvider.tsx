@@ -7,7 +7,7 @@ type ThemeContextValue = {
   toggleTheme: () => void
 }
 
-const STORAGE_KEY = "qapp-ui-theme"
+const STORAGE_KEY = "potero-ui-theme"
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
 
