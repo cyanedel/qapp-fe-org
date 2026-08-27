@@ -1,4 +1,4 @@
-import { handleAuthResponse } from "@/api/auth"
+import { authenticatedFetch } from "@/api/session"
 import { env } from "@/config/env"
 import { ApiError } from "@/api/response"
 
@@ -82,12 +82,11 @@ export interface CollectionSummary {
 }
 
 export const getOrgCollectionList = async (orgId: string): Promise<CollectionSummary[]> => {
-  const response = await fetch(`${env.API_URL}/collection/${encodeURIComponent(orgId)}/list`, {
+  const response = await authenticatedFetch(`${env.API_URL}/collection/${encodeURIComponent(orgId)}/list`, {
     method: "GET",
     credentials: "include",
   })
 
-  handleAuthResponse(response)
   const data = await response.json()
 
   if (!response.ok) {
@@ -98,7 +97,7 @@ export const getOrgCollectionList = async (orgId: string): Promise<CollectionSum
 }
 
 export const createCollection = async (payload: CreateCollectionPayload): Promise<CreateCollectionResponse> => {
-  const response = await fetch(`${env.API_URL}/org/collection/create`, {
+  const response = await authenticatedFetch(`${env.API_URL}/org/collection/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -107,7 +106,6 @@ export const createCollection = async (payload: CreateCollectionPayload): Promis
     body: JSON.stringify(payload),
   })
 
-  handleAuthResponse(response)
   const data = await response.json()
 
   if (!response.ok) {
@@ -145,14 +143,13 @@ export interface CollectionUserGrant {
 }
 
 const requestCollectionMutation = async (url: string, method: "PATCH" | "POST" | "DELETE", body?: unknown) => {
-  const response = await fetch(`${env.API_URL}${url}`, {
+  const response = await authenticatedFetch(`${env.API_URL}${url}`, {
     method,
     headers: body ? { "Content-Type": "application/json" } : undefined,
     credentials: "include",
     body: body ? JSON.stringify(body) : undefined,
   })
 
-  handleAuthResponse(response)
   const data = await response.json()
   if (!response.ok) {
     throw new ApiError(data, "Collection operation failed")
@@ -167,8 +164,7 @@ export const updateCollectionAccessPolicy = async (collectionId: string, accessT
   requestCollectionMutation(`/org/collection/${collectionId}/access-policy`, "PATCH", { access_type: accessType })
 
 export const listCollectionEditors = async (collectionId: string): Promise<CollectionEditor[]> => {
-  const response = await fetch(`${env.API_URL}/org/collection/${collectionId}/editor/list`, { credentials: "include" })
-  handleAuthResponse(response)
+  const response = await authenticatedFetch(`${env.API_URL}/org/collection/${collectionId}/editor/list`)
   const data = await response.json()
   if (!response.ok) throw new ApiError(data, "Failed to load editors")
   return data.editors ?? data.data ?? []
@@ -187,29 +183,26 @@ export interface CollectionEditPermissionResponse {
 }
 
 export const getCollectionEditPermission = async (collectionId: string): Promise<CollectionEditPermissionResponse> => {
-  const response = await fetch(`${env.API_URL}/org/collection/${collectionId}/permissions`, { credentials: "include" })
-  handleAuthResponse(response)
+  const response = await authenticatedFetch(`${env.API_URL}/org/collection/${collectionId}/permissions`)
   const data = await response.json()
   if (!response.ok) throw new ApiError(data, "Failed to check collection edit permission")
   return data
 }
 
 export const getCollection = async (collectionId: string): Promise<CollectionData> => {
-  const response = await fetch(`${env.API_URL}/org/collection/${collectionId}`, { credentials: "include" })
-  handleAuthResponse(response)
+  const response = await authenticatedFetch(`${env.API_URL}/org/collection/${collectionId}`)
   const data = await response.json()
   if (!response.ok) throw new ApiError(data, "Failed to load collection")
   return data.collection
 }
 
 const patchCollection = async (collectionId: string, payload: UpdateCollectionPayload): Promise<CreateCollectionResponse> => {
-  const response = await fetch(`${env.API_URL}/org/collection/${collectionId}/edit`, {
+  const response = await authenticatedFetch(`${env.API_URL}/org/collection/${collectionId}/edit`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
     body: JSON.stringify(payload),
   })
-  handleAuthResponse(response)
   const data = await response.json()
   if (!response.ok) throw new ApiError(data, "Failed to update collection")
   return data
@@ -222,16 +215,14 @@ export const updateCollectionQuestions = async (collectionId: string, payload: U
   patchCollection(collectionId, payload)
 
 export const listOrganizationAccessTags = async (orgId: string): Promise<CollectionAccessTag[]> => {
-  const response = await fetch(`${env.API_URL}/org/organization/${orgId}/access-tag/list`, { credentials: "include" })
-  handleAuthResponse(response)
+  const response = await authenticatedFetch(`${env.API_URL}/org/organization/${orgId}/access-tag/list`)
   const data = await response.json()
   if (!response.ok) throw new ApiError(data, "Failed to load access tags")
   return data.access_tags ?? data.data ?? []
 }
 
 export const listCollectionAccessTags = async (collectionId: string): Promise<CollectionAccessTag[]> => {
-  const response = await fetch(`${env.API_URL}/org/collection/${collectionId}/access-tag/list`, { credentials: "include" })
-  handleAuthResponse(response)
+  const response = await authenticatedFetch(`${env.API_URL}/org/collection/${collectionId}/access-tag/list`)
   const data = await response.json()
   if (!response.ok) throw new ApiError(data, "Failed to load collection access tags")
   return data.access_tags ?? data.data ?? []
@@ -244,8 +235,7 @@ export const removeCollectionAccessTag = async (collectionId: string, tagId: str
   requestCollectionMutation(`/org/collection/${collectionId}/access-tag/${tagId}`, "DELETE")
 
 export const listCollectionUserGrants = async (collectionId: string): Promise<CollectionUserGrant[]> => {
-  const response = await fetch(`${env.API_URL}/org/collection/${collectionId}/user-grant/list`, { credentials: "include" })
-  handleAuthResponse(response)
+  const response = await authenticatedFetch(`${env.API_URL}/org/collection/${collectionId}/user-grant/list`)
   const data = await response.json()
   if (!response.ok) throw new ApiError(data, "Failed to load collection grants")
   return data.user_grants ?? data.grants ?? data.data ?? []

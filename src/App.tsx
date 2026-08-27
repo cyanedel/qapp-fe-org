@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { AUTH_SESSION_EXPIRED_EVENT, validateCurrentSession } from "@/api/auth"
+import { startSessionRenewal } from "@/api/session"
 import { CollectionList } from "@/components/CollectionList"
 import { CollectionView } from "@/components/CollectionView"
 import { CollectionQuestionsView } from "@/components/CollectionQuestionsView"
@@ -31,6 +32,8 @@ function App() {
   const { isAuthenticated, logout, setUser } = useAuthStore()
   const clearCollectionDraft = useCollectionDraftStore((state) => state.clearDraft)
   const [authChecked, setAuthChecked] = useState(false)
+
+  useEffect(() => startSessionRenewal(), [])
 
   useEffect(() => {
     let isMounted = true

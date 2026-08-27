@@ -2,6 +2,7 @@ import { env } from "@/config/env"
 import { collectAccessLogInfo } from "@/lib/accessLogInfo"
 import type { User } from "@/types/auth"
 import { ApiError } from "@/api/response"
+import { authenticatedFetch, markSessionAvailable, markSessionUnavailable } from "@/api/session"
 
 export const AUTH_SESSION_EXPIRED_EVENT = "qapp-auth-session-expired"
 
@@ -13,10 +14,6 @@ export class AuthError extends Error {
     this.name = "AuthError"
     this.code = code
   }
-}
-
-const notifySessionExpired = () => {
-  window.dispatchEvent(new Event(AUTH_SESSION_EXPIRED_EVENT))
 }
 
 export const loginUser = async (email: string, password: string) => {
@@ -35,6 +32,7 @@ export const loginUser = async (email: string, password: string) => {
     throw new ApiError(data, "Failed to login")
   }
 
+  markSessionAvailable()
   return data
 }
 
@@ -58,7 +56,7 @@ export const registerUser = async (email: string, password: string) => {
 }
 
 export const getCurrentUser = async (): Promise<User> => {
-  const response = await fetch(`${env.API_URL}/org/auth/me`, {
+  const response = await authenticatedFetch(`${env.API_URL}/org/auth/me`, {
     method: "GET",
     credentials: "include",
   })
@@ -73,14 +71,14 @@ export const getCurrentUser = async (): Promise<User> => {
     throw new ApiError(data, "Failed to load user profile")
   }
 
+  markSessionAvailable()
   return data.user ?? data
 }
 
 const updateOrgAuthUser = async <T>(path: string, payload: T) => {
-  const response = await fetch(`${env.API_URL}/org/auth/me/${path}`, {
+  const response = await authenticatedFetch(`${env.API_URL}/org/auth/me/${path}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
     body: JSON.stringify(payload),
   })
   const data = await response.json()
@@ -108,9 +106,7 @@ export const updateUsername = (username: string) => updateOrgAuthUser("username"
 export const updatePassword = (current_password: string, new_password: string) => updateOrgAuthUser("password", { current_password, new_password })
 
 export const checkUsernameAvailability = async (username: string): Promise<{ username: string; available: boolean }> => {
-  const response = await fetch(`${env.API_URL}/org/auth/username-availability?username=${encodeURIComponent(username)}`, {
-    credentials: "include",
-  })
+  const response = await authenticatedFetch(`${env.API_URL}/org/auth/username-availability?username=${encodeURIComponent(username)}`)
   const data = await response.json()
   if (!response.ok) throw new ApiError(data, "Unable to check username")
   return data
@@ -124,12 +120,6 @@ export const validateCurrentSession = async (): Promise<User | null> => {
       return null
     }
     throw err
-  }
-}
-
-export const handleAuthResponse = (response: Response) => {
-  if (response.status === 401) {
-    notifySessionExpired()
   }
 }
 
@@ -149,5 +139,6 @@ export const logoutUser = async () => {
     throw new ApiError(data, "Failed to logout")
   }
 
+  markSessionUnavailable()
   return data
 }

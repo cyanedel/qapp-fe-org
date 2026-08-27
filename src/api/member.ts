@@ -1,10 +1,9 @@
-import { handleAuthResponse } from "@/api/auth"
+import { authenticatedFetch } from "@/api/session"
 import { ApiError } from "@/api/response"
 import { env } from "@/config/env"
 import type { OrganizationMember, UserSearchResult } from "@/types/member"
 
 const parseResponse = async (response: Response, fallbackMessage: string) => {
-  handleAuthResponse(response)
   const data = await response.json()
 
   if (!response.ok) {
@@ -17,7 +16,7 @@ const parseResponse = async (response: Response, fallbackMessage: string) => {
 const memberUrl = (workspaceId: string) => `${env.API_URL}/org/organization/${encodeURIComponent(workspaceId)}/member`
 
 export const listOrganizationMembers = async (workspaceId: string): Promise<OrganizationMember[]> => {
-  const response = await fetch(memberUrl(workspaceId), { credentials: "include" })
+  const response = await authenticatedFetch(memberUrl(workspaceId))
   const data = await parseResponse(response, "Failed to load workspace members")
   return data.members ?? []
 }
@@ -25,13 +24,13 @@ export const listOrganizationMembers = async (workspaceId: string): Promise<Orga
 export const searchOrganizationUsers = async (workspaceId: string, query: string): Promise<UserSearchResult[]> => {
   const url = new URL(`${memberUrl(workspaceId)}/search`)
   url.searchParams.set("query", query)
-  const response = await fetch(url, { credentials: "include" })
+  const response = await authenticatedFetch(url)
   const data = await parseResponse(response, "Failed to search users")
   return data.users ?? []
 }
 
 export const addOrganizationMember = async (workspaceId: string, userId: string) => {
-  const response = await fetch(memberUrl(workspaceId), {
+  const response = await authenticatedFetch(memberUrl(workspaceId), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -41,7 +40,7 @@ export const addOrganizationMember = async (workspaceId: string, userId: string)
 }
 
 export const removeOrganizationMember = async (workspaceId: string, userId: string) => {
-  const response = await fetch(`${memberUrl(workspaceId)}/${encodeURIComponent(userId)}`, {
+  const response = await authenticatedFetch(`${memberUrl(workspaceId)}/${encodeURIComponent(userId)}`, {
     method: "DELETE",
     credentials: "include",
   })
@@ -49,7 +48,7 @@ export const removeOrganizationMember = async (workspaceId: string, userId: stri
 }
 
 export const updateOrganizationMemberStatus = async (workspaceId: string, userId: string, status: "active" | "suspended" | "removed") => {
-  const response = await fetch(`${memberUrl(workspaceId)}/${encodeURIComponent(userId)}/status`, {
+  const response = await authenticatedFetch(`${memberUrl(workspaceId)}/${encodeURIComponent(userId)}/status`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -59,7 +58,7 @@ export const updateOrganizationMemberStatus = async (workspaceId: string, userId
 }
 
 export const addOrganizationRepresentative = async (workspaceId: string, userId: string) => {
-  const response = await fetch(`${env.API_URL}/org/organization/${encodeURIComponent(workspaceId)}/representative`, {
+  const response = await authenticatedFetch(`${env.API_URL}/org/organization/${encodeURIComponent(workspaceId)}/representative`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -69,7 +68,7 @@ export const addOrganizationRepresentative = async (workspaceId: string, userId:
 }
 
 export const removeOrganizationRepresentative = async (workspaceId: string, userId: string) => {
-  const response = await fetch(`${env.API_URL}/org/organization/${encodeURIComponent(workspaceId)}/representative/${encodeURIComponent(userId)}`, {
+  const response = await authenticatedFetch(`${env.API_URL}/org/organization/${encodeURIComponent(workspaceId)}/representative/${encodeURIComponent(userId)}`, {
     method: "DELETE",
     credentials: "include",
   })
