@@ -132,14 +132,11 @@ export const CollectionQuestionsForm = ({
     }
   }
 
-  const handleImportFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] ?? null
-    if (!file) return
-
+  const handleImportFileSelect = (file: File) => {
     setError(null)
     if (!isSupportedCollectionImport(file.name)) {
       setError(t("collectionFormExtras.invalidFile"))
-      event.target.value = ""
+      if (importFileInputRef.current) importFileInputRef.current.value = ""
       return
     }
 
@@ -235,7 +232,7 @@ export const CollectionQuestionsForm = ({
             disabled={loading}
             parsing={parsingImport}
             selectedFileName={selectedImportFileName}
-            onFileChange={handleImportFileChange}
+            onFileSelect={handleImportFileSelect}
           />
 
           <ReactSortable<CollectionQuestionFormValues>
