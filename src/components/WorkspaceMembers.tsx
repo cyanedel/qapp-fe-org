@@ -6,6 +6,7 @@ import { addOrganizationMember, addOrganizationRepresentative, listOrganizationM
 import { getWorkspace } from "@/api/workspace"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { useAuthStore } from "@/store/useAuthStore"
@@ -21,6 +22,7 @@ export const WorkspaceMembers = () => {
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<UserSearchResult[]>([])
+  const [isNoResultsDialogOpen, setIsNoResultsDialogOpen] = useState(false)
   const [searching, setSearching] = useState(false)
   const [mutatingUserId, setMutatingUserId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -68,12 +70,19 @@ export const WorkspaceMembers = () => {
     setSearching(true)
     setError(null)
     try {
-      setResults(await searchOrganizationUsers(activeWorkspaceId, query.trim()))
+      const searchResults = await searchOrganizationUsers(activeWorkspaceId, query.trim())
+      setResults(searchResults)
+      setIsNoResultsDialogOpen(searchResults.length === 0)
     } catch (err) {
       setError(t("members.searchFailed"))
     } finally {
       setSearching(false)
     }
+  }
+
+  const handleNoResultsDialogOpenChange = (open: boolean) => {
+    setIsNoResultsDialogOpen(open)
+    if (!open) setQuery("")
   }
 
   const handleAdd = async (candidate: UserSearchResult) => {
@@ -187,6 +196,20 @@ export const WorkspaceMembers = () => {
           </Card>
         </>
       )}
+
+      <Dialog open={isNoResultsDialogOpen} onOpenChange={handleNoResultsDialogOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("members.noResultsTitle")}</DialogTitle>
+            <DialogDescription>{t("members.noResultsDescription")}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button">{t("members.noResultsClose")}</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
