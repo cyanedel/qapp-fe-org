@@ -17,15 +17,18 @@ export interface CreateCollectionPayload {
   questions: CreateQuestionItem[]
   search_tags?: string[]
   access_type?: CollectionAccessType
+  status?: CollectionStatus
   max_attempts?: number | null
 }
 
 export type CollectionAccessType = "public" | "premium" | "public_org" | "grant_org"
+export type CollectionStatus = "draft" | "published" | "archived"
 
 export interface CreateCollectionResponse {
   code: string
   message: string
   collection_id?: string
+  status?: CollectionStatus
 }
 
 export interface CollectionQuestion {
@@ -46,6 +49,9 @@ export interface CollectionData {
   description?: string | null
   search_tags?: string[]
   access_type: CollectionAccessType
+  status: CollectionStatus
+  published_at?: string | null
+  archived_at?: string | null
   max_attempts?: number | null
   questions: CollectionQuestion[]
   can_edit: boolean
@@ -78,6 +84,9 @@ export interface CollectionSummary {
   description?: string | null
   search_tags?: string[]
   access_type?: CollectionAccessType
+  status: CollectionStatus
+  published_at?: string | null
+  archived_at?: string | null
   can_edit: boolean
 }
 
@@ -162,6 +171,9 @@ export const deleteCollection = async (collectionId: string) =>
 
 export const updateCollectionAccessPolicy = async (collectionId: string, accessType: CollectionAccessType) =>
   requestCollectionMutation(`/org/collection/${collectionId}/access-policy`, "PATCH", { access_type: accessType })
+
+export const updateCollectionStatus = async (collectionId: string, status: CollectionStatus): Promise<CreateCollectionResponse> =>
+  requestCollectionMutation(`/org/collection/${collectionId}/status`, "PATCH", { status })
 
 export const listCollectionEditors = async (collectionId: string): Promise<CollectionEditor[]> => {
   const response = await authenticatedFetch(`${env.API_URL}/org/collection/${collectionId}/editor/list`)

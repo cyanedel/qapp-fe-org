@@ -55,6 +55,7 @@ export const CreateCollectionQuestions = () => {
       <CollectionQuestionsForm
         mode="create"
         collectionTitle={draft.summary.title.trim()}
+        createStatus={draft.summary.status === "published" ? "published" : "draft"}
         onBack={() => navigate("/collections/create")}
         onSubmit={(questions) => {
           const summary = collectionSummaryPayload(draft.summary)
@@ -62,6 +63,7 @@ export const CreateCollectionQuestions = () => {
             ...summary,
             description: summary.description || null,
             org_id: draft.orgId,
+            status: draft.summary.status === "published" ? "published" : "draft",
             questions,
           })
         }}

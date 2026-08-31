@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { AlertCircle, Ellipsis, FolderPlus, Pencil, Tags, Trash2 } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
-import { deleteCollection, getOrgCollectionList, type CollectionSummary } from "@/api/collection"
+import { deleteCollection, getOrgCollectionList, type CollectionStatus, type CollectionSummary } from "@/api/collection"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
@@ -21,6 +21,11 @@ export const CollectionList = () => {
   const [collectionPendingDelete, setCollectionPendingDelete] = useState<CollectionSummary | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [collectionMenuOpen, setCollectionMenuOpen] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState<"all" | CollectionStatus>("all")
+
+  const visibleCollections = statusFilter === "all"
+    ? collections
+    : collections.filter((collection) => collection.status === statusFilter)
 
   useEffect(() => {
     let isMounted = true
@@ -103,6 +108,25 @@ export const CollectionList = () => {
         </div>
       )}
 
+      {!loading && collections.length > 0 && (
+        <div className="flex items-center justify-end gap-2">
+          <label htmlFor="collection-status-filter" className="text-sm font-medium text-muted-foreground">
+            {t("collectionLifecycle.filterLabel")}
+          </label>
+          <select
+            id="collection-status-filter"
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value as "all" | CollectionStatus)}
+            className="h-9 rounded-md border bg-background px-3 text-sm"
+          >
+            <option value="all">{t("collectionLifecycle.filterAll")}</option>
+            <option value="draft">{t("collectionLifecycle.status_draft")}</option>
+            <option value="published">{t("collectionLifecycle.status_published")}</option>
+            <option value="archived">{t("collectionLifecycle.status_archived")}</option>
+          </select>
+        </div>
+      )}
+
       {loading ? (
         <Card>
           <CardContent className="flex min-h-56 items-center justify-center text-center text-sm text-muted-foreground">
@@ -110,7 +134,7 @@ export const CollectionList = () => {
             {t("collections.loading")}
           </CardContent>
         </Card>
-      ) : collections.length === 0 ? (
+      ) : visibleCollections.length === 0 ? (
         <Card>
           <CardContent className="flex min-h-56 items-center justify-center text-center text-sm text-muted-foreground">
             {t("collections.empty")}
@@ -118,7 +142,7 @@ export const CollectionList = () => {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
-          {collections.map((collection) => (
+          {visibleCollections.map((collection) => (
             <Card
               key={collection.collectionid}
               className="group relative cursor-pointer transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -142,6 +166,9 @@ export const CollectionList = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex items-center rounded-md border bg-muted px-2 py-1 text-xs font-semibold text-foreground">
+                    {t(`collectionLifecycle.status_${collection.status}`)}
+                  </span>
                   <span className="inline-flex items-center rounded-md border bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
                     {t(`collections.${collection.access_type || "public"}`)}
                   </span>

@@ -8,10 +8,11 @@ import { useTranslation } from "react-i18next"
 interface CollectionDetailsCardProps {
   values: CollectionDetailsValues
   disabled?: boolean
+  showCreateStatus?: boolean
   onChange: (values: CollectionDetailsValues) => void
 }
 
-export const CollectionDetailsCard = ({ values, disabled = false, onChange }: CollectionDetailsCardProps) => {
+export const CollectionDetailsCard = ({ values, disabled = false, showCreateStatus = false, onChange }: CollectionDetailsCardProps) => {
   const { t } = useTranslation()
   return (
     <Card className="min-w-0 overflow-hidden">
@@ -53,6 +54,27 @@ export const CollectionDetailsCard = ({ values, disabled = false, onChange }: Co
             disabled={disabled}
           />
         </div>
+
+        {showCreateStatus && (
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="collection-status">{t("collectionLifecycle.createStatus")}</Label>
+            <select
+              id="collection-status"
+              value={values.status}
+              onChange={(event) => onChange({ ...values, status: event.target.value as "draft" | "published" })}
+              disabled={disabled}
+              className="h-10 w-full rounded-md border border-transparent bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&>option]:bg-background [&>option]:text-foreground"
+            >
+              <option value="draft">{t("collectionLifecycle.saveAsDraft")}</option>
+              <option value="published">{t("collectionLifecycle.publishOnCreate")}</option>
+            </select>
+            <p className="text-xs text-muted-foreground">
+              {values.status === "published"
+                ? t("collectionLifecycle.publishOnCreateHelp")
+                : t("collectionLifecycle.draftOnCreateHelp")}
+            </p>
+          </div>
+        )}
 
         <div className="space-y-2">
           <Label htmlFor="collection-access-type">{t("collections.accessType")}</Label>

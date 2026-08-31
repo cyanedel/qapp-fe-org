@@ -11,6 +11,7 @@ export const emptyCollectionDetails = (): CollectionDetailsValues => ({
   description: "",
   searchTags: "",
   accessType: "public",
+  status: "draft",
   maxAttempts: "0",
 })
 
@@ -19,6 +20,7 @@ export const collectionDetailsFromData = (collection: CollectionData): Collectio
   description: collection.description ?? "",
   searchTags: collection.search_tags?.join(", ") ?? "",
   accessType: collection.access_type,
+  status: collection.status,
   maxAttempts: String(collection.max_attempts ?? 0),
 })
 

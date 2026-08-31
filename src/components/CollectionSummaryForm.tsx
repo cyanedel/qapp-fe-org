@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { AlertCircle, ArrowRight, Save } from "lucide-react"
 import { CollectionDetailsCard } from "@/components/CollectionDetailsCard"
@@ -22,6 +22,8 @@ interface CollectionSummaryFormProps {
   validate?: (values: CollectionDetailsValues) => string | null
   onSave?: (values: CollectionDetailsValues) => Promise<void>
   onQuestions: (values: CollectionDetailsValues) => void
+  disabled?: boolean
+  beforeDetails?: ReactNode
 }
 
 export const CollectionSummaryForm = ({
@@ -30,6 +32,8 @@ export const CollectionSummaryForm = ({
   validate,
   onSave,
   onQuestions,
+  disabled = false,
+  beforeDetails,
 }: CollectionSummaryFormProps) => {
   const { t } = useTranslation()
   const [values, setValues] = useState(initialValues)
@@ -62,7 +66,7 @@ export const CollectionSummaryForm = ({
   }
 
   const saveChanges = async () => {
-    if (mode !== "edit" || !isDirty || !onSave) return
+    if (mode !== "edit" || disabled || !isDirty || !onSave) return
 
     setError(null)
     setSaved(false)
@@ -134,18 +138,21 @@ export const CollectionSummaryForm = ({
             }
           }}
         >
+          {beforeDetails}
+
           <CollectionDetailsCard
             values={values}
             onChange={(nextValues) => {
               setValues(nextValues)
               setSaved(false)
             }}
-            disabled={loading}
+            disabled={loading || disabled}
+            showCreateStatus={mode === "create"}
           />
 
           <div className="flex flex-col justify-end gap-3 sm:flex-row">
             {mode === "edit" && (
-              <Button type="submit" variant="outline" size="lg" disabled={loading || !isDirty}>
+              <Button type="submit" variant="outline" size="lg" disabled={loading || disabled || !isDirty}>
                 {loading ? <Spinner className="mr-2 size-4" /> : <Save className="h-4 w-4" />}
                 {t("collectionFlow.saveChanges")}
               </Button>
@@ -154,7 +161,7 @@ export const CollectionSummaryForm = ({
             <Button
               type={mode === "create" ? "submit" : "button"}
               size="lg"
-              disabled={loading}
+              disabled={loading || disabled}
               onClick={mode === "edit" ? openQuestions : undefined}
             >
               <ArrowRight className="h-4 w-4" />

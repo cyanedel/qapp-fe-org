@@ -1,10 +1,11 @@
-import type { CollectionAccessType } from "@/api/collection"
+import type { CollectionAccessType, CollectionStatus } from "@/api/collection"
 
 export interface CollectionDetailsValues {
   title: string
   description: string
   searchTags: string
   accessType: CollectionAccessType
+  status: CollectionStatus
   maxAttempts: string
 }
 

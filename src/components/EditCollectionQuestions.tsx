@@ -37,6 +37,10 @@ export const EditCollectionQuestions = () => {
           navigate(`/collections/${collectionId}/questions`, { replace: true })
           return
         }
+        if (data.status === "archived") {
+          navigate(`/collections/${collectionId}/edit`, { replace: true })
+          return
+        }
         if (!hasEditableQuestions(data)) {
           throw new Error("Editable collection response did not include correct answers")
         }

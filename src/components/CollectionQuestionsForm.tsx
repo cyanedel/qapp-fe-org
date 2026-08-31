@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { ReactSortable } from "react-sortablejs"
 import { AlertCircle, ArrowLeft, Plus, Save } from "lucide-react"
 import type {
+  CollectionStatus,
   CreateCollectionResponse,
   CreateQuestionItem,
   EditableCollectionQuestion,
@@ -36,6 +37,7 @@ interface CollectionQuestionsFormProps {
   onBack: () => void
   onSubmit: (questions: CreateQuestionItem[]) => Promise<CreateCollectionResponse>
   onSuccess: (response: CreateCollectionResponse) => void
+  createStatus?: Extract<CollectionStatus, "draft" | "published">
 }
 
 export const CollectionQuestionsForm = ({
@@ -45,6 +47,7 @@ export const CollectionQuestionsForm = ({
   onBack,
   onSubmit,
   onSuccess,
+  createStatus = "draft",
 }: CollectionQuestionsFormProps) => {
   const { t } = useTranslation()
   const importFileInputRef = useRef<HTMLInputElement>(null)
@@ -191,8 +194,8 @@ export const CollectionQuestionsForm = ({
     try {
       const response = await onSubmit(questionPayloadFromForms(questions))
       onSuccess(response)
-    } catch {
-      setError(t("collectionFormExtras.saveFailed"))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("collectionFormExtras.saveFailed"))
     } finally {
       setLoading(false)
     }
@@ -217,6 +220,11 @@ export const CollectionQuestionsForm = ({
           <p className="max-w-2xl text-sm text-muted-foreground">
             {t("collectionFlow.questionsDescription")}
           </p>
+          {mode === "create" && (
+            <span className="inline-flex rounded-full border bg-muted px-3 py-1 text-xs font-semibold">
+              {t(`collectionLifecycle.status_${createStatus}`)}
+            </span>
+          )}
         </div>
 
         {error && (
@@ -286,7 +294,9 @@ export const CollectionQuestionsForm = ({
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  {mode === "create" ? t("collectionForm.create") : t("collectionFlow.saveQuestions")}
+                  {mode === "create"
+                    ? t(createStatus === "published" ? "collectionLifecycle.createAndPublish" : "collectionLifecycle.createDraft")
+                    : t("collectionFlow.saveQuestions")}
                 </>
               )}
             </Button>

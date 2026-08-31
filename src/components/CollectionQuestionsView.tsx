@@ -89,7 +89,7 @@ export const CollectionQuestionsView = () => {
         ))}
       </div>
 
-      {collection.can_edit && (
+      {collection.can_edit && collection.status !== "archived" && (
         <Button
           className="self-end"
           onClick={() => navigate(`/collections/${collection.collection_id}/edit/questions`)}
