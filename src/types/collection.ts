@@ -7,6 +7,8 @@ export interface CollectionDetailsValues {
   accessType: CollectionAccessType
   status: CollectionStatus
   maxAttempts: string
+  subscriberIds: string[]
+  subscriberGroupIds: string[]
 }
 
 export interface CollectionQuestionFormValues {

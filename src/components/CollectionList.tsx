@@ -170,7 +170,7 @@ export const CollectionList = () => {
                     {t(`collectionLifecycle.status_${collection.status}`)}
                   </span>
                   <span className="inline-flex items-center rounded-md border bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-                    {t(`collections.${collection.access_type || "public"}`)}
+                    {t(`collectionAccessTypes.label_${collection.access_type || "public"}`)}
                   </span>
                 </div>
 

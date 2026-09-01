@@ -76,20 +76,26 @@ export const CollectionDetailsCard = ({ values, disabled = false, showCreateStat
           </div>
         )}
 
-        <div className="space-y-2">
-          <Label htmlFor="collection-access-type">{t("collections.accessType")}</Label>
-          <select
-            id="collection-access-type"
-            value={values.accessType}
-            onChange={(event) => onChange({ ...values, accessType: event.target.value as CollectionAccessType })}
-            disabled={disabled}
-            className="h-10 w-full rounded-md border border-transparent bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&>option]:bg-background [&>option]:text-foreground"
-          >
-            <option value="public">{t("collections.public")}</option>
-            <option value="premium">{t("collections.premium")}</option>
-            <option value="public_org">{t("collections.organizationMembers")}</option>
-            <option value="grant_org">{t("collections.organizationGrant")}</option>
-          </select>
+        <div className="space-y-3 md:col-span-2">
+          <Label>{t("collections.accessType")}</Label>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {(["public", "premium", "public_org", "grant_org"] as CollectionAccessType[]).map((accessType) => {
+              const selected = values.accessType === accessType
+              return (
+                <button
+                  key={accessType}
+                  type="button"
+                  disabled={disabled}
+                  aria-pressed={selected}
+                  onClick={() => onChange({ ...values, accessType })}
+                  className={`rounded-lg border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:opacity-50 ${selected ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "hover:bg-muted/50"}`}
+                >
+                  <span className="flex items-center gap-2 text-sm font-semibold"><span className={`size-3 rounded-full border ${selected ? "border-primary bg-primary ring-2 ring-primary/20" : "border-muted-foreground"}`} />{t(`collectionAccessTypes.label_${accessType}`)}</span>
+                  <span className="mt-2 block text-xs text-muted-foreground">{t(`collectionAccessTypes.description_${accessType}`)}</span>
+                </button>
+              )
+            })}
+          </div>
         </div>
 
         <div className="space-y-2">

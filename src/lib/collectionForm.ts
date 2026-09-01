@@ -13,15 +13,22 @@ export const emptyCollectionDetails = (): CollectionDetailsValues => ({
   accessType: "public",
   status: "draft",
   maxAttempts: "0",
+  subscriberIds: [],
+  subscriberGroupIds: [],
 })
 
-export const collectionDetailsFromData = (collection: CollectionData): CollectionDetailsValues => ({
+export const collectionDetailsFromData = (
+  collection: CollectionData,
+  grants?: { subscriber_ids: string[]; subscriber_group_ids: string[] },
+): CollectionDetailsValues => ({
   title: collection.title,
   description: collection.description ?? "",
   searchTags: collection.search_tags?.join(", ") ?? "",
   accessType: collection.access_type,
   status: collection.status,
   maxAttempts: String(collection.max_attempts ?? 0),
+  subscriberIds: grants?.subscriber_ids ?? [],
+  subscriberGroupIds: grants?.subscriber_group_ids ?? [],
 })
 
 export const parseCollectionSearchTags = (searchTags: string): string[] =>
@@ -40,6 +47,8 @@ export const collectionSummaryPayload = (
   search_tags: parseCollectionSearchTags(details.searchTags),
   access_type: details.accessType,
   max_attempts: Number(details.maxAttempts),
+  subscriber_ids: details.subscriberIds,
+  subscriber_group_ids: details.subscriberGroupIds,
 })
 
 export const collectionSummaryFingerprint = (details: CollectionDetailsValues): string =>

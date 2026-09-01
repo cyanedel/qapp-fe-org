@@ -22,7 +22,7 @@ export const CollectionSummaryView = ({ collection }: CollectionSummaryViewProps
         </SummaryField>
 
         <SummaryField label={t("collections.accessType")}>
-          {t(`collections.${collection.access_type}`)}
+          {t(`collectionAccessTypes.label_${collection.access_type}`)}
         </SummaryField>
 
         <SummaryField label={t("collections.maxAttempts")}>

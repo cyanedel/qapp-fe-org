@@ -1,6 +1,7 @@
 import { authenticatedFetch } from "@/api/session"
 import { env } from "@/config/env"
 import { ApiError } from "@/api/response"
+import type { OrganizationSubscriber, SubscriberGroup } from "@/types/subscriber"
 
 export interface CreateQuestionItem {
   id?: number
@@ -17,6 +18,8 @@ export interface CreateCollectionPayload {
   questions: CreateQuestionItem[]
   search_tags?: string[]
   access_type?: CollectionAccessType
+  subscriber_ids?: string[]
+  subscriber_group_ids?: string[]
   status?: CollectionStatus
   max_attempts?: number | null
 }
@@ -67,6 +70,8 @@ export interface UpdateCollectionSummaryPayload {
   search_tags: string[]
   access_type: CollectionAccessType
   max_attempts: number
+  subscriber_ids: string[]
+  subscriber_group_ids: string[]
 }
 
 export interface UpdateCollectionQuestionsPayload {
@@ -149,6 +154,16 @@ export interface CollectionUserGrant {
   expires_at?: string | null
   created_at?: string
   deleted_at?: string | null
+}
+
+export interface CollectionSubscriberGrantConfiguration {
+  subscriber_ids: string[]
+  subscriber_group_ids: string[]
+}
+
+export interface CollectionSubscriberGrantOptions {
+  subscribers: OrganizationSubscriber[]
+  groups: SubscriberGroup[]
 }
 
 const requestCollectionMutation = async (url: string, method: "PATCH" | "POST" | "DELETE", body?: unknown) => {
@@ -258,3 +273,32 @@ export const assignCollectionUserGrant = async (collectionId: string, userId: st
 
 export const removeCollectionUserGrant = async (collectionId: string, userId: string) =>
   requestCollectionMutation(`/org/collection/${collectionId}/user-grant/${userId}`, "DELETE")
+
+export const getCollectionSubscriberGrantConfiguration = async (collectionId: string): Promise<CollectionSubscriberGrantConfiguration> => {
+  const response = await authenticatedFetch(`${env.API_URL}/org/collection/${encodeURIComponent(collectionId)}/subscriber-grant`)
+  const data = await response.json()
+  if (!response.ok) throw new ApiError(data, "Failed to load collection subscriber grants")
+  return data.subscriber_grants ?? { subscriber_ids: [], subscriber_group_ids: [] }
+}
+
+export const getCollectionSubscriberGrantOptions = async (organizationId: string): Promise<CollectionSubscriberGrantOptions> => {
+  const response = await authenticatedFetch(`${env.API_URL}/org/organization/${encodeURIComponent(organizationId)}/subscriber-grant-options`)
+  const data = await response.json()
+  if (!response.ok) throw new ApiError(data, "Failed to load collection subscriber grant options")
+  return data.subscriber_grant_options ?? { subscribers: [], groups: [] }
+}
+
+export const syncCollectionSubscriberGrantConfiguration = async (
+  collectionId: string,
+  configuration: CollectionSubscriberGrantConfiguration,
+): Promise<CollectionSubscriberGrantConfiguration> => {
+  const response = await authenticatedFetch(`${env.API_URL}/org/collection/${encodeURIComponent(collectionId)}/subscriber-grant`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(configuration),
+  })
+  const data = await response.json()
+  if (!response.ok) throw new ApiError(data, "Failed to update collection subscriber grants")
+  return data.subscriber_grants
+}

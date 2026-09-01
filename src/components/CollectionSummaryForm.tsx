@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { AlertCircle, ArrowRight, Save } from "lucide-react"
 import { CollectionDetailsCard } from "@/components/CollectionDetailsCard"
+import { CollectionSubscriberAccessCard } from "@/components/CollectionSubscriberAccessCard"
 import { OperationOverlay } from "@/components/OperationOverlay"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,6 +25,7 @@ interface CollectionSummaryFormProps {
   onQuestions: (values: CollectionDetailsValues) => void
   disabled?: boolean
   beforeDetails?: ReactNode
+  organizationId?: string
 }
 
 export const CollectionSummaryForm = ({
@@ -34,6 +36,7 @@ export const CollectionSummaryForm = ({
   onQuestions,
   disabled = false,
   beforeDetails,
+  organizationId = "",
 }: CollectionSummaryFormProps) => {
   const { t } = useTranslation()
   const [values, setValues] = useState(initialValues)
@@ -149,6 +152,18 @@ export const CollectionSummaryForm = ({
             disabled={loading || disabled}
             showCreateStatus={mode === "create"}
           />
+
+          {values.accessType === "grant_org" && organizationId && (
+            <CollectionSubscriberAccessCard
+              organizationId={organizationId}
+              values={values}
+              onChange={(nextValues) => {
+                setValues(nextValues)
+                setSaved(false)
+              }}
+              disabled={loading || disabled}
+            />
+          )}
 
           <div className="flex flex-col justify-end gap-3 sm:flex-row">
             {mode === "edit" && (

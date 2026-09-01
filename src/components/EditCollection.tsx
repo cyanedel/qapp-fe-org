@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { AlertCircle } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { getCollection, updateCollectionStatus, updateCollectionSummary, type CollectionData, type CollectionStatus } from "@/api/collection"
+import { getCollection, getCollectionSubscriberGrantConfiguration, updateCollectionStatus, updateCollectionSummary, type CollectionData, type CollectionStatus, type CollectionSubscriberGrantConfiguration } from "@/api/collection"
 import { CollectionLifecycleCard } from "@/components/CollectionLifecycleCard"
 import { CollectionSummaryForm } from "@/components/CollectionSummaryForm"
 import { Button } from "@/components/ui/button"
@@ -15,6 +15,7 @@ export const EditCollection = () => {
   const { collectionId = "" } = useParams()
   const navigate = useNavigate()
   const [collection, setCollection] = useState<CollectionData | null>(null)
+  const [subscriberGrants, setSubscriberGrants] = useState<CollectionSubscriberGrantConfiguration>({ subscriber_ids: [], subscriber_group_ids: [] })
   const [loading, setLoading] = useState(true)
   const [lifecycleLoading, setLifecycleLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -36,7 +37,11 @@ export const EditCollection = () => {
           navigate(`/collections/${collectionId}`, { replace: true })
           return
         }
-        if (isMounted) setCollection(data)
+        const grants = await getCollectionSubscriberGrantConfiguration(collectionId)
+        if (isMounted) {
+          setCollection(data)
+          setSubscriberGrants(grants)
+        }
       } catch {
         if (isMounted) setError(t("collections.loadFailed"))
       } finally {
@@ -99,7 +104,8 @@ export const EditCollection = () => {
     <CollectionSummaryForm
       key={collection.collection_id}
       mode="edit"
-      initialValues={collectionDetailsFromData(collection)}
+      organizationId={collection.org_id ?? ""}
+      initialValues={collectionDetailsFromData(collection, subscriberGrants)}
       disabled={collection.status === "archived"}
       beforeDetails={(
         <>

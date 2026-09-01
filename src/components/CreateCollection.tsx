@@ -17,6 +17,7 @@ export const CreateCollection = () => {
   return (
     <CollectionSummaryForm
       mode="create"
+      organizationId={workspaceId}
       initialValues={draft?.summary ?? emptyCollectionDetails()}
       validate={() => (workspaceId ? null : t("collectionFormExtras.workspaceRequired"))}
       onQuestions={(values) => {
