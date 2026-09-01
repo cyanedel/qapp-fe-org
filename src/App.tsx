@@ -19,6 +19,7 @@ import { Workspaces } from "@/components/Workspaces"
 import { CreateWorkspace } from "@/components/CreateWorkspace"
 import { ManageWorkspace } from "@/components/ManageWorkspace"
 import { WorkspaceMembers } from "@/components/WorkspaceMembers"
+import { WorkspaceSubscribers } from "@/components/WorkspaceSubscribers"
 import { ThemeProvider } from "@/components/ThemeProvider"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
@@ -131,6 +132,7 @@ function App() {
                 <Route path="/workspaces/create" element={<CreateWorkspace />} />
                 <Route path="/workspaces/:workspaceId/manage" element={<ManageWorkspace />} />
                 <Route path="/workspaces/members" element={<WorkspaceMembers />} />
+                <Route path="/workspaces/subscribers" element={<WorkspaceSubscribers />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
             </Route>

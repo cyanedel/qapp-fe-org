@@ -2,7 +2,7 @@ import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
-import { Building2, Check, ChevronDown, Folder, FolderPlus, Home, List, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Plus, Settings, User as UserIcon, Users } from "lucide-react"
+import { Building2, Check, ChevronDown, Folder, FolderPlus, GraduationCap, Home, List, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Plus, Settings, User as UserIcon, Users } from "lucide-react"
 import { logoutUser } from "@/api/auth"
 import { Button } from "@/components/ui/button"
 import { LanguageSelector } from "@/components/LanguageSelector"
@@ -116,6 +116,7 @@ export const SidebarLayout = () => {
               <div id="workspaces-sidebar-menu" className="space-y-1 pl-4">
                 <SidebarLink to="/workspaces" icon={<List className="h-4 w-4" />} label={t("sidebar.allWorkspaces")} isOpen={isSidebarOpen} active={location.pathname === "/workspaces"} />
                 <SidebarLink to="/workspaces/members" icon={<Users className="h-4 w-4" />} label={t("sidebar.members")} isOpen={isSidebarOpen} active={location.pathname === "/workspaces/members"} />
+                <SidebarLink to="/workspaces/subscribers" icon={<GraduationCap className="h-4 w-4" />} label={t("sidebar.subscribers")} isOpen={isSidebarOpen} active={location.pathname === "/workspaces/subscribers"} />
                 <SidebarLink to="/workspaces/create" icon={<Plus className="h-4 w-4" />} label={t("sidebar.createNew")} isOpen={isSidebarOpen} active={location.pathname === "/workspaces/create"} />
               </div>
             )}
