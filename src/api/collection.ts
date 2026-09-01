@@ -140,14 +140,6 @@ export interface CollectionEditor {
   removed_at?: string | null
 }
 
-export interface CollectionAccessTag {
-  tag_id: string
-  org_id?: string
-  name: string
-  created_at?: string
-  deleted_at?: string | null
-}
-
 export interface CollectionUserGrant {
   collection_id: string
   user_id: string
@@ -240,26 +232,6 @@ export const updateCollectionSummary = async (collectionId: string, payload: Upd
 
 export const updateCollectionQuestions = async (collectionId: string, payload: UpdateCollectionQuestionsPayload) =>
   patchCollection(collectionId, payload)
-
-export const listOrganizationAccessTags = async (orgId: string): Promise<CollectionAccessTag[]> => {
-  const response = await authenticatedFetch(`${env.API_URL}/org/organization/${orgId}/access-tag/list`)
-  const data = await response.json()
-  if (!response.ok) throw new ApiError(data, "Failed to load access tags")
-  return data.access_tags ?? data.data ?? []
-}
-
-export const listCollectionAccessTags = async (collectionId: string): Promise<CollectionAccessTag[]> => {
-  const response = await authenticatedFetch(`${env.API_URL}/org/collection/${collectionId}/access-tag/list`)
-  const data = await response.json()
-  if (!response.ok) throw new ApiError(data, "Failed to load collection access tags")
-  return data.access_tags ?? data.data ?? []
-}
-
-export const assignCollectionAccessTag = async (collectionId: string, tagId: string, expiresAt?: string | null) =>
-  requestCollectionMutation(`/org/collection/${collectionId}/access-tag`, "POST", { tag_id: tagId, expires_at: expiresAt ?? null })
-
-export const removeCollectionAccessTag = async (collectionId: string, tagId: string) =>
-  requestCollectionMutation(`/org/collection/${collectionId}/access-tag/${tagId}`, "DELETE")
 
 export const listCollectionUserGrants = async (collectionId: string): Promise<CollectionUserGrant[]> => {
   const response = await authenticatedFetch(`${env.API_URL}/org/collection/${collectionId}/user-grant/list`)
